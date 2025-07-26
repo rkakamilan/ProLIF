@@ -18,10 +18,10 @@ except ImportError:
     class _DummyMDA:
         class SelectionError(Exception):
             pass
-        
+
         def __getattr__(self, name):
             raise NotImplementedError("MDAnalysis is no longer supported")
-    
+
     mda = _DummyMDA()
 
 from rdkit import Chem
@@ -120,7 +120,7 @@ class Molecule(BaseRDKitMol):
     ) -> "Molecule":
         """Creates a Molecule from an MDAnalysis object (DEPRECATED)
 
-        .. deprecated:: 
+        .. deprecated::
             MDAnalysis support has been removed. Use alternative methods:
             - For PDB files: use :meth:`from_file` or RDKit directly
             - For single structures: use supplier classes (sdf_supplier, pdbqt_supplier)
@@ -132,9 +132,10 @@ class Molecule(BaseRDKitMol):
             This method is no longer supported
         """
         raise NotImplementedError(
-            "Molecule.from_mda() is no longer supported due to removal of MDAnalysis dependency. "
-            "Alternative approaches:\n"
-            "  - For PDB files: use Molecule.from_rdkit(Chem.MolFromPDBFile('file.pdb'))\n"
+            "Molecule.from_mda() is no longer supported due to removal of "
+            "MDAnalysis dependency. Alternative approaches:\n"
+            "  - For PDB files: use "
+            "Molecule.from_rdkit(Chem.MolFromPDBFile('file.pdb'))\n"
             "  - For SDF files: use sdf_supplier('file.sdf')\n"
             "  - For PDBQT files: use pdbqt_supplier(['file.pdbqt'], template)\n"
             "  - For single structures: use RDKit directly\n"
@@ -145,7 +146,8 @@ class Molecule(BaseRDKitMol):
     def _use_segid(cls, obj: "MDAObject", use_segid: bool | None = None) -> bool:
         """Whether to use the segment index or the chainID as a chain (DEPRECATED)."""
         raise NotImplementedError(
-            "_use_segid() is no longer supported due to removal of MDAnalysis dependency."
+            "_use_segid() is no longer supported due to removal of "
+            "MDAnalysis dependency."
         )
 
     @classmethod
@@ -305,7 +307,7 @@ class pdbqt_supplier(Sequence[Molecule]):
                 "Please convert PDBQT files to PDB or SDF format using external tools "
                 "(e.g., Open Babel: obabel -ipdbqt file.pdbqt -opdb -O file.pdb)."
             )
-        
+
         with catch_warning(message=r"^Failed to guess the mass"):
             pdbqt = mda.Universe(pdbqt_path)
         # set attributes needed by the converter

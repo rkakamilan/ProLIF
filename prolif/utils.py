@@ -11,7 +11,7 @@ from copy import deepcopy
 from functools import wraps
 from importlib.util import find_spec
 from math import pi
-from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar, overload
+from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -25,10 +25,10 @@ except ImportError:
     # ダミークラスを定義
     class AtomGroup:
         pass
-    
+
     class Universe:
         pass
-    
+
     class Timestep:
         pass
 
@@ -37,7 +37,6 @@ from rdkit.Chem import FragmentOnBonds, GetMolFrags, SplitMolByPDBResidues
 from rdkit.DataStructs import ExplicitBitVect, UIntSparseIntVect
 from rdkit.Geometry import Point3D
 from scipy.spatial import cKDTree
-from tqdm.auto import tqdm
 
 from prolif.residue import ResidueId
 
@@ -45,7 +44,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     from prolif.rdkitmol import BaseRDKitMol
-    from prolif.typeshed import IFPResults, Trajectory
+    from prolif.typeshed import IFPResults
 
 _90_deg_to_rad = pi / 2
 
@@ -420,18 +419,19 @@ def to_countvectors(df: pd.DataFrame) -> list[UIntSparseIntVect]:
 
 def select_over_trajectory(*args, **kwargs):
     """Trajectory-based atom selection (DEPRECATED)
-    
+
     This function is no longer supported due to removal of MDAnalysis dependency.
     It was designed for analyzing atom selections over MD trajectories.
-    
+
     Raises
     ------
     NotImplementedError
         This function is no longer supported
     """
     raise NotImplementedError(
-        "select_over_trajectory() is no longer supported due to removal of MDAnalysis dependency. "
-        "This function was designed for MD trajectory analysis, which is not supported "
-        "in the current docking-focused version. "
-        "For static atom selections, use RDKit's molecule methods directly."
+        "select_over_trajectory() is no longer supported due to removal of "
+        "MDAnalysis dependency. This function was designed for MD trajectory "
+        "analysis, which is not supported in the current docking-focused "
+        "version. For static atom selections, use RDKit's molecule methods "
+        "directly."
     )
