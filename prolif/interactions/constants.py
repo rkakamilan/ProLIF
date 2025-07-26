@@ -2,11 +2,32 @@
 Constants used by the package for interactions.
 """
 
-from MDAnalysis.topology.tables import vdwradii
 from rdkit.Chem import GetPeriodicTable
 
+# MDAnalysis-compatible VdW radii data (originally from MDAnalysis.topology.tables)
+# Source: Standard atomic radii from various literature sources
+_MDANALYSIS_VDWRADII = {
+    'h': 1.2, 'he': 1.4, 'li': 1.82, 'be': 1.53, 'b': 1.92, 'c': 1.7, 'n': 1.55,
+    'o': 1.52, 'f': 1.47, 'ne': 1.54, 'na': 2.27, 'mg': 1.73, 'al': 1.84, 'si': 2.1,
+    'p': 1.8, 's': 1.8, 'cl': 1.75, 'ar': 1.88, 'k': 2.75, 'ca': 2.31, 'sc': 2.11,
+    'ti': 2.0, 'v': 2.0, 'cr': 2.0, 'mn': 2.0, 'fe': 2.0, 'co': 2.0, 'ni': 1.63,
+    'cu': 1.4, 'zn': 1.39, 'ga': 1.87, 'ge': 2.11, 'as': 1.85, 'se': 1.9, 'br': 1.85,
+    'kr': 2.02, 'rb': 3.03, 'sr': 2.49, 'y': 2.0, 'zr': 2.0, 'nb': 2.0, 'mo': 2.0,
+    'tc': 2.0, 'ru': 2.0, 'rh': 2.0, 'pd': 1.63, 'ag': 1.72, 'cd': 1.58, 'in': 1.93,
+    'sn': 2.17, 'sb': 2.06, 'te': 2.06, 'i': 1.98, 'xe': 2.16, 'cs': 3.43, 'ba': 2.68,
+    'la': 2.0, 'ce': 2.0, 'pr': 2.0, 'nd': 2.0, 'pm': 2.0, 'sm': 2.0, 'eu': 2.0,
+    'gd': 2.0, 'tb': 2.0, 'dy': 2.0, 'ho': 2.0, 'er': 2.0, 'tm': 2.0, 'yb': 2.0,
+    'lu': 2.0, 'hf': 2.0, 'ta': 2.0, 'w': 2.0, 're': 2.0, 'os': 2.0, 'ir': 2.0,
+    'pt': 1.72, 'au': 1.66, 'hg': 1.55, 'tl': 1.96, 'pb': 2.02, 'bi': 2.07, 'po': 1.97,
+    'at': 2.02, 'rn': 2.2, 'fr': 3.48, 'ra': 2.83, 'ac': 2.0, 'th': 2.0, 'pa': 2.0,
+    'u': 1.86, 'np': 2.0, 'pu': 2.0, 'am': 2.0, 'cm': 2.0, 'bk': 2.0, 'cf': 2.0,
+    'es': 2.0, 'fm': 2.0, 'md': 2.0, 'no': 2.0, 'lr': 2.0, 'rf': 2.0, 'db': 2.0,
+    'sg': 2.0, 'bh': 2.0, 'hs': 2.0, 'mt': 2.0, 'ds': 2.0, 'rg': 2.0, 'cn': 2.0,
+    'nh': 2.0, 'fl': 2.0, 'mc': 2.0, 'lv': 2.0, 'ts': 2.0, 'og': 2.0
+}
+
 VDWRADII: dict[str, float] = {
-    symbol.capitalize(): radius for symbol, radius in vdwradii.items()
+    symbol.capitalize(): radius for symbol, radius in _MDANALYSIS_VDWRADII.items()
 }
 
 PT = GetPeriodicTable()

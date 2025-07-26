@@ -15,8 +15,23 @@ from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar, overload
 
 import numpy as np
 import pandas as pd
-from MDAnalysis import AtomGroup, Universe
-from MDAnalysis.coordinates.timestep import Timestep
+
+try:
+    from MDAnalysis import AtomGroup, Universe
+    from MDAnalysis.coordinates.timestep import Timestep
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+    # ダミークラスを定義
+    class AtomGroup:
+        pass
+    
+    class Universe:
+        pass
+    
+    class Timestep:
+        pass
+
 from rdkit import Chem, rdBase
 from rdkit.Chem import FragmentOnBonds, GetMolFrags, SplitMolByPDBResidues
 from rdkit.DataStructs import ExplicitBitVect, UIntSparseIntVect
@@ -403,33 +418,20 @@ def to_countvectors(df: pd.DataFrame) -> list[UIntSparseIntVect]:
     ).tolist()
 
 
-@overload
-def select_over_trajectory(  # type: ignore[no-any-unimported]
-    u: Universe, trajectory: "Trajectory", selections: str, **kwargs: Any
-) -> AtomGroup: ...
-@overload
-def select_over_trajectory(  # type: ignore[no-any-unimported]
-    u: Universe, trajectory: "Trajectory", *selections: str, **kwargs: Any
-) -> list[AtomGroup]: ...
-def select_over_trajectory(  # type: ignore[no-any-unimported]
-    u: Universe, trajectory: "Trajectory", *selections: str, **kwargs: Any
-) -> AtomGroup | list[AtomGroup]:
-    """Returns AtomGroup(s) that satisfy each distance-based ``selection`` over the
-    entire trajectory rather than only the first frame. Only useful for distance-based
-    selections.
-    Use ``group {0}`` in any additional selection to refer to the AtomGroup generated
-    by the first selection, or ``group {N-1}`` for the Nth selection.
+def select_over_trajectory(*args, **kwargs):
+    """Trajectory-based atom selection (DEPRECATED)
+    
+    This function is no longer supported due to removal of MDAnalysis dependency.
+    It was designed for analyzing atom selections over MD trajectories.
+    
+    Raises
+    ------
+    NotImplementedError
+        This function is no longer supported
     """
-    ix: list[set[int]] = [set() for _ in selections]
-    groups: dict[str, AtomGroup] = {  # type: ignore[no-any-unimported]
-        f"group{i}": Universe.empty(0).atoms for i, _ in enumerate(selections)
-    }
-    trajectory = (trajectory,) if isinstance(trajectory, Timestep) else trajectory
-    for _ in tqdm(trajectory):
-        for i, sel in enumerate(selections):
-            groups[f"group{i}"] = group = u.select_atoms(
-                sel.format(*groups), **{**kwargs, **groups}
-            )
-            ix[i].update(group.ix)
-    atomgroups = [AtomGroup(sorted(indices), u) for indices in ix]
-    return atomgroups[0] if len(atomgroups) == 1 else atomgroups
+    raise NotImplementedError(
+        "select_over_trajectory() is no longer supported due to removal of MDAnalysis dependency. "
+        "This function was designed for MD trajectory analysis, which is not supported "
+        "in the current docking-focused version. "
+        "For static atom selections, use RDKit's molecule methods directly."
+    )
