@@ -29,7 +29,7 @@ jobs:
       with:
         path: |
           dist/prolif_lite-*.whl
-          dist/prolif-lite-*.tar.gz
+          dist/prolif_lite-*.tar.gz
         key: prolif-lite-${{ runner.os }}-${{ github.sha }}
 
     - name: Publish to PyPI
