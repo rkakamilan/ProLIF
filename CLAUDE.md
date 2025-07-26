@@ -36,7 +36,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ProLIF (Protein-Ligand Interaction Fingerprints) is a Python package for generating interaction fingerprints between proteins, ligands, DNA, and RNA molecules from molecular dynamics trajectories, docking simulations, and experimental structures. The package is built on top of MDAnalysis and RDKit.
+ProLIF (Protein-Ligand Interaction Fingerprints) is a Python package for generating interaction fingerprints between proteins, ligands, DNA, and RNA molecules from docking simulations and experimental structures. 
+
+**⚠️ IMPORTANT: MDAnalysis Dependency Removed**
+As of the latest version, MDAnalysis dependency has been removed to resolve LGPL3 licensing issues. The package now focuses on docking results analysis (PDB/PDBQT proteins + SDF ligands) and no longer supports MD trajectory analysis. This change enables use under more permissive licenses.
 
 ## Commands
 
@@ -93,18 +96,78 @@ uv sync
 
 ### Data Flow
 
-1. Input structures/trajectories → Molecule objects (via MDAnalysis)
+1. Input structures (PDB/SDF files) → Molecule objects (via RDKit)
 2. Molecule objects → Interaction detection (via interaction classes)
 3. Detected interactions → IFP storage
 4. IFP → Analysis outputs (DataFrames, bitvectors, plots)
 
+### Supported Input Formats
+
+✅ **Supported** (Docking Analysis):
+- PDB files: Protein structures
+- SDF files: Ligand structures from docking
+- MOL2 files: Limited support via RDKit
+
+❌ **No Longer Supported** (MD Trajectory Analysis):
+- PDBQT files: Requires MDAnalysis conversion
+- Trajectory formats (XTC, TRR, DCD): MD simulation analysis
+- `Molecule.from_mda()`: Use `Molecule.from_rdkit()` instead
+- `select_over_trajectory()`: Use RDKit molecule methods
+
 ### Key Dependencies
 
-- **MDAnalysis**: Reading molecular structures and trajectories
-- **RDKit**: Chemical informatics and molecular representations
+- **RDKit**: Chemical informatics and molecular representations (primary)
 - **NetworkX**: Network analysis for interaction networks
 - **Pandas**: Data manipulation and analysis
 - **NumPy/SciPy**: Numerical computations
+
+### Removed Dependencies
+
+- **MDAnalysis**: ❌ Removed due to LGPL3 licensing. Functions requiring MDAnalysis now raise `NotImplementedError` with migration guidance.
+
+## Migration Guide (MDAnalysis Removal)
+
+### Code Changes Required
+
+**Old (MDAnalysis-based):**
+```python
+import MDAnalysis as mda
+import prolif
+
+# Load from trajectory
+u = mda.Universe("protein.pdb", "trajectory.xtc")
+ligand_ag = u.select_atoms("resname LIG")
+protein_ag = u.select_atoms("protein")
+
+ligand = prolif.Molecule.from_mda(ligand_ag)
+protein = prolif.Molecule.from_mda(protein_ag)
+```
+
+**New (RDKit-based):**
+```python
+from rdkit import Chem
+import prolif
+
+# Load from static structures
+protein_mol = Chem.MolFromPDBFile("protein.pdb", removeHs=False)
+protein = prolif.Molecule.from_rdkit(protein_mol)
+
+# Load ligands from SDF
+ligands = prolif.sdf_supplier("ligands.sdf")
+```
+
+### Deprecated Functions
+
+| Function | Status | Alternative |
+|----------|--------|------------|
+| `Molecule.from_mda()` | ❌ Removed | Use `Molecule.from_rdkit()` |
+| `pdbqt_supplier` | ❌ Removed | Convert PDBQT to PDB/SDF first |
+| `select_over_trajectory()` | ❌ Removed | Use RDKit molecule methods |
+| Water bridge interactions | ⚠️ Simplified | Basic implementation without MD features |
+
+### Error Messages
+
+All removed functions provide clear error messages with migration guidance.
 
 ### Testing Structure
 

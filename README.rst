@@ -11,7 +11,7 @@ ProLIF
     * - **Builds**
       - |conda-version| |pypi-version| |build|
     * - **Dependencies**
-      - |mdanalysis| |rdkit|
+      - |rdkit|
     * - **License**
       - |license|
 
@@ -20,8 +20,55 @@ Description
 
 ProLIF (*Protein-Ligand Interaction Fingerprints*) is a tool designed to generate
 interaction fingerprints for complexes made of ligands, protein, DNA or RNA molecules
-extracted from molecular dynamics trajectories, docking simulations and experimental
-structures.
+extracted from docking simulations and experimental structures.
+
+.. note::
+   
+   **MDAnalysis Dependency Removed**: As of this version, MDAnalysis dependency has been 
+   removed to resolve LGPL3 licensing issues. The package now focuses on docking results 
+   analysis and no longer supports MD trajectory analysis. This enables use under more 
+   permissive licenses.
+
+Supported Features
+------------------
+
+✅ **Currently Supported**:
+
+* Protein-ligand interaction analysis from docking results
+* PDB protein structure support  
+* SDF ligand structure support
+* MOL2 file support (limited via RDKit)
+* All core interaction types (hydrogen bonds, hydrophobic, π-stacking, etc.)
+* Interaction fingerprint generation and analysis
+* Export to DataFrames and bitvectors
+
+❌ **No Longer Supported**:
+
+* MD trajectory analysis (XTC, TRR, DCD formats)
+* PDBQT file support (requires conversion to PDB/SDF)
+* ``Molecule.from_mda()`` method
+* ``select_over_trajectory()`` function  
+* Advanced water bridge analysis requiring trajectory data
+
+Migration Guide
+---------------
+
+**Old Code**::
+
+    import MDAnalysis as mda
+    import prolif
+
+    u = mda.Universe("protein.pdb", "trajectory.xtc") 
+    ligand = prolif.Molecule.from_mda(u.select_atoms("resname LIG"))
+
+**New Code**::
+
+    from rdkit import Chem
+    import prolif
+
+    protein = Chem.MolFromPDBFile("protein.pdb", removeHs=False)
+    protein_mol = prolif.Molecule.from_rdkit(protein)
+    ligands = prolif.sdf_supplier("ligands.sdf")
 
 Documentation
 -------------
@@ -106,9 +153,6 @@ distributed under the Apache License, Version 2.0 ::
     :target: http://www.apache.org/licenses/LICENSE-2.0
     :alt: License
 
-.. |mdanalysis| image:: https://img.shields.io/badge/Powered%20by-MDAnalysis-orange.svg?logoWidth=16&logo=data:image/x-icon;base64,AAABAAEAEBAAAAEAIAAoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJD+XwCY/fEAkf3uAJf97wGT/a+HfHaoiIWE7n9/f+6Hh4fvgICAjwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACT/yYAlP//AJ///wCg//8JjvOchXly1oaGhv+Ghob/j4+P/39/f3IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJH8aQCY/8wAkv2kfY+elJ6al/yVlZX7iIiI8H9/f7h/f38UAAAAAAAAAAAAAAAAAAAAAAAAAAB/f38egYF/noqAebF8gYaagnx3oFpUUtZpaWr/WFhY8zo6OmT///8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgICAn46Ojv+Hh4b/jouJ/4iGhfcAAADnAAAA/wAAAP8AAADIAAAAAwCj/zIAnf2VAJD/PAAAAAAAAAAAAAAAAICAgNGHh4f/gICA/4SEhP+Xl5f/AwMD/wAAAP8AAAD/AAAA/wAAAB8Aov9/ALr//wCS/Z0AAAAAAAAAAAAAAACBgYGOjo6O/4mJif+Pj4//iYmJ/wAAAOAAAAD+AAAA/wAAAP8AAABhAP7+FgCi/38Axf4fAAAAAAAAAAAAAAAAiIiID4GBgYKCgoKogoB+fYSEgZhgYGDZXl5e/m9vb/9ISEjpEBAQxw8AAFQAAAAAAAAANQAAADcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjo6Mb5iYmP+cnJz/jY2N95CQkO4pKSn/AAAA7gAAAP0AAAD7AAAAhgAAAAEAAAAAAAAAAACL/gsAkv2uAJX/QQAAAAB9fX3egoKC/4CAgP+NjY3/c3Nz+wAAAP8AAAD/AAAA/wAAAPUAAAAcAAAAAAAAAAAAnP4NAJL9rgCR/0YAAAAAfX19w4ODg/98fHz/i4uL/4qKivwAAAD/AAAA/wAAAP8AAAD1AAAAGwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALGxsVyqqqr/mpqa/6mpqf9KSUn/AAAA5QAAAPkAAAD5AAAAhQAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADkUFBSuZ2dn/3V1df8uLi7bAAAATgBGfyQAAAA2AAAAMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB0AAADoAAAA/wAAAP8AAAD/AAAAWgC3/2AAnv3eAJ/+dgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA9AAAA/wAAAP8AAAD/AAAA/wAKDzEAnP3WAKn//wCS/OgAf/8MAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIQAAANwAAADtAAAA7QAAAMAAABUMAJn9gwCe/e0Aj/2LAP//AQAAAAAAAAAA
-    :alt: Powered by MDAnalysis
-    :target: https://www.mdanalysis.org
 
 .. |rdkit| image:: https://img.shields.io/badge/Powered%20by-RDKit-3838ff.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQBAMAAADt3eJSAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAFVBMVEXc3NwUFP8UPP9kZP+MjP+0tP////9ZXZotAAAAAXRSTlMAQObYZgAAAAFiS0dEBmFmuH0AAAAHdElNRQfmAwsPGi+MyC9RAAAAQElEQVQI12NgQABGQUEBMENISUkRLKBsbGwEEhIyBgJFsICLC0iIUdnExcUZwnANQWfApKCK4doRBsKtQFgKAQC5Ww1JEHSEkAAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMi0wMy0xMVQxNToyNjo0NyswMDowMDzr2J4AAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjItMDMtMTFUMTU6MjY6NDcrMDA6MDBNtmAiAAAAAElFTkSuQmCC
       :alt: Powered by RDKit
