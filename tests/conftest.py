@@ -7,21 +7,22 @@ from numpy.testing import assert_array_almost_equal
 from rdkit import Chem
 from rdkit.Chem.rdMolTransforms import ComputeCentroid
 
+from prolif.datafiles import TOP, TRAJ, WATER_TOP, WATER_TRAJ, datapath
+from prolif.interactions.base import _INTERACTIONS
+from prolif.molecule import Molecule, sdf_supplier
+
 # MDAnalysis support is removed - skip related functionality
 pytest_plugins = []
 
 try:
     from MDAnalysis import Universe
     from MDAnalysis.topology.guessers import guess_atom_element
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
     Universe = None
     guess_atom_element = None
-
-from prolif.datafiles import TOP, TRAJ, WATER_TOP, WATER_TRAJ, datapath
-from prolif.interactions.base import _INTERACTIONS
-from prolif.molecule import Molecule, sdf_supplier
 
 if TYPE_CHECKING:
     from prolif.molecule import BaseRDKitMol
@@ -114,7 +115,7 @@ def from_mol2(filename: str) -> Molecule:
             return Molecule.from_rdkit(mol)
         except Exception:
             pytest.skip(f"Cannot read MOL2 file {filename} without MDAnalysis")
-    
+
     path = str(datapath / filename)
     u = Universe(path)
     elements = [guess_atom_element(n) for n in u.atoms.names]

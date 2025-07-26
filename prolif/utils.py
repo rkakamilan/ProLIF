@@ -19,9 +19,11 @@ import pandas as pd
 try:
     from MDAnalysis import AtomGroup, Universe
     from MDAnalysis.coordinates.timestep import Timestep
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
+
     # ダミークラスを定義
     class AtomGroup:
         pass
@@ -31,6 +33,7 @@ except ImportError:
 
     class Timestep:
         pass
+
 
 from rdkit import Chem, rdBase
 from rdkit.Chem import FragmentOnBonds, GetMolFrags, SplitMolByPDBResidues

@@ -29,7 +29,7 @@ defaults:
 
 jobs:
   build:
-    name: Build ProLIF package
+    name: Build ProLIF-lite package
     runs-on: ubuntu-latest
 
     steps:
@@ -78,37 +78,37 @@ jobs:
 
     - name: List .tar.gz content
       run: |
-        tar -ztvf dist/prolif-*.tar.gz
+        tar -ztvf dist/prolif-lite-*.tar.gz
     
     - name: Ensure tests and data included in source dist
       if: inputs.test-files
       run: |
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/tests/.+' || exit 1
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/tests/conftest.py' || exit 1
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/tests/plotting/.+' || exit 1
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/data/.+' || exit 1
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/data/vina/.+' || exit 1
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/prolif/plotting/network/network.html' || exit 1
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/prolif/plotting/network/network.css' || exit 1
-        tar -ztvf dist/prolif-*.tar.gz | grep -E 'prolif-.+/prolif/plotting/network/network.js' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/tests/.+' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/tests/conftest.py' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/tests/plotting/.+' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/data/.+' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/data/vina/.+' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/prolif/plotting/network/network.html' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/prolif/plotting/network/network.css' || exit 1
+        tar -ztvf dist/prolif-lite-*.tar.gz | grep -E 'prolif-lite-.+/prolif/plotting/network/network.js' || exit 1
 
     - name: Cache package
       if: inputs.cache-package
       uses: actions/cache/save@v3
       with:
         path: |
-          dist/prolif-*.whl
-          dist/prolif-*.tar.gz
-        key: prolif-${{ runner.os }}-${{ github.sha }}
+          dist/prolif_lite-*.whl
+          dist/prolif-lite-*.tar.gz
+        key: prolif-lite-${{ runner.os }}-${{ github.sha }}
 
     - name: Expose package as artifact
       if: inputs.upload-package
       uses: actions/upload-artifact@v4
       with:
-        name: prolif-package
+        name: prolif-lite-package
         path: |
-          dist/prolif-*.whl
-          dist/prolif-*.tar.gz
+          dist/prolif_lite-*.whl
+          dist/prolif-lite-*.tar.gz
         if-no-files-found: error
         retention-days: 20
 
@@ -137,13 +137,13 @@ jobs:
       id: cache-prolif
       with:
         path: |
-          dist/prolif-*.whl
-          dist/prolif-*.tar.gz
-        key: prolif-${{ runner.os }}-${{ github.sha }}
+          dist/prolif_lite-*.whl
+          dist/prolif-lite-*.tar.gz
+        key: prolif-lite-${{ runner.os }}-${{ github.sha }}
     
     - name: Install from tar.gz
       run: |
-        pip install dist/prolif-*.tar.gz
+        pip install dist/prolif-lite-*.tar.gz
 
     - name: Test tar.gz install
       working-directory: scripts/
@@ -152,11 +152,11 @@ jobs:
 
     - name: Remove previous ProLIF install
       run: |
-        pip uninstall -y prolif
+        pip uninstall -y prolif-lite
 
     - name: Install from wheel
       run: |
-        pip install dist/prolif-*.whl
+        pip install dist/prolif_lite-*.whl
 
     - name: Test wheel install
       working-directory: scripts/

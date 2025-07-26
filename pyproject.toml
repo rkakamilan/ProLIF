@@ -1,6 +1,6 @@
 [project]
-name = "prolif"
-description = "Interaction Fingerprints for protein-ligand complexes and more"
+name = "prolif-lite"
+description = "Interaction Fingerprints for protein-ligand docking analysis (MDAnalysis-free version)"
 authors = [{ name = "Cédric Bouysset", email = "cedric@bouysset.net" }]
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -84,11 +84,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/chemosim-lab/ProLIF"
+Homepage = "https://github.com/rkakamilan/ProLIF"
 Documentation = "https://prolif.readthedocs.io/en/stable/"
-Discussions = "https://github.com/chemosim-lab/ProLIF/discussions"
-Issues = "https://github.com/chemosim-lab/ProLIF/issues"
-Changelog = "https://github.com/chemosim-lab/ProLIF/blob/master/CHANGELOG.md"
+Discussions = "https://github.com/rkakamilan/ProLIF/discussions"
+Issues = "https://github.com/rkakamilan/ProLIF/issues"
+Changelog = "https://github.com/rkakamilan/ProLIF/blob/master/CHANGELOG.md"
 
 [tool.setuptools]
 zip-safe = false

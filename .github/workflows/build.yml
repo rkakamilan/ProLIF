@@ -28,9 +28,9 @@ jobs:
       id: cache-prolif
       with:
         path: |
-          dist/prolif-*.whl
-          dist/prolif-*.tar.gz
-        key: prolif-${{ runner.os }}-${{ github.sha }}
+          dist/prolif_lite-*.whl
+          dist/prolif-lite-*.tar.gz
+        key: prolif-lite-${{ runner.os }}-${{ github.sha }}
 
     - name: Publish to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1

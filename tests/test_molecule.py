@@ -2,12 +2,16 @@ from contextlib import AbstractContextManager, nullcontext
 from typing import TYPE_CHECKING, ClassVar
 
 import pytest
+
 try:
     from MDAnalysis import SelectionError
+
     _HAS_MDANALYSIS = True
 except ImportError:
+
     class SelectionError(Exception):
         pass
+
     _HAS_MDANALYSIS = False
 from numpy.testing import assert_array_equal
 from rdkit import Chem
@@ -31,10 +35,9 @@ class TestMolecule(pytest.BaseTestMixinRDKitMol):  # type: ignore[name-defined]
         for atom in mol.GetAtoms():
             assert atom.GetUnsignedProp("mapindex") == atom.GetIdx()
 
-    def test_from_mda(self, u: "Universe", ligand_rdkit: Chem.Mol) -> None:
+    def test_from_mda(self, u: "Universe") -> None:
         if not _HAS_MDANALYSIS:
             pytest.skip("MDAnalysis not available")
-        rdkit_mol = Molecule(ligand_rdkit)
         with pytest.raises(NotImplementedError, match="MDAnalysis dependency"):
             Molecule.from_mda(u, "resname LIG")
 
@@ -79,7 +82,10 @@ class TestMolecule(pytest.BaseTestMixinRDKitMol):  # type: ignore[name-defined]
         if not _HAS_MDANALYSIS:
             pytest.skip("MDAnalysis not available")
         with pytest.raises(NotImplementedError, match="MDAnalysis dependency"):
-            Molecule.from_mda(water_u.select_atoms("resname TIP3 and byres around 6 protein"), NoImplicit=False)
+            Molecule.from_mda(
+                water_u.select_atoms("resname TIP3 and byres around 6 protein"),
+                NoImplicit=False,
+            )
 
 
 class SupplierBase:
@@ -128,7 +134,9 @@ class TestPDBQTSupplier(SupplierBase):
             "C(Cc4ccccc4)N3C2=O)C=C2c3cccc4[nH]cc"
             "(c34)CC21"
         )
-        with pytest.raises(NotImplementedError, match="PDBQT file support requires MDAnalysis"):
+        with pytest.raises(
+            NotImplementedError, match="PDBQT file support requires MDAnalysis"
+        ):
             pdbqt_supplier(pdbqts, template)
 
     def test_pdbqt_hydrogens_stay_in_mol(self, ligand_rdkit: Chem.Mol) -> None:
