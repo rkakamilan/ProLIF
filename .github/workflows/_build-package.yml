@@ -83,14 +83,14 @@ jobs:
     - name: Ensure tests and data included in source dist
       if: inputs.test-files
       run: |
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/tests/.+' || exit 1
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/tests/conftest.py' || exit 1
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/tests/plotting/.+' || exit 1
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/data/.+' || exit 1
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/data/vina/.+' || exit 1
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/prolif/plotting/network/network.html' || exit 1
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/prolif/plotting/network/network.css' || exit 1
-        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif-lite-.+/prolif/plotting/network/network.js' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/tests/.+' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/tests/conftest.py' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/tests/plotting/.+' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/data/.+' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/data/vina/.+' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/prolif/plotting/network/network.html' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/prolif/plotting/network/network.css' || exit 1
+        tar -ztvf dist/prolif_lite-*.tar.gz | grep -E 'prolif_lite-.+/prolif/plotting/network/network.js' || exit 1
 
     - name: Cache package
       if: inputs.cache-package
