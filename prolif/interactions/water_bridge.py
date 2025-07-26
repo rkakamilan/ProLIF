@@ -20,17 +20,19 @@ import networkx as nx
 
 try:
     from MDAnalysis.core.groups import UpdatingAtomGroup
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
-    
-    # ダミークラスを定義（MDAnalysisが利用できない場合）
+
+    # ダミークラスを定義(MDAnalysisが利用できない場合)
     class UpdatingAtomGroup:
         def __init__(self, *args, **kwargs):
             raise NotImplementedError(
                 "UpdatingAtomGroup requires MDAnalysis, which is no longer supported. "
                 "Water bridge analysis for trajectories is not available."
             )
+
 
 from prolif.ifp import IFP, InteractionData
 from prolif.interactions.base import BridgedInteraction
@@ -91,14 +93,18 @@ class WaterBridge(BridgedInteraction):
             raise ValueError("order must be greater than 0")
         if min_order > order:
             raise ValueError("min_order cannot be greater than order")
-        
+
         # MDAnalysis依存のチェック
-        if not _HAS_MDANALYSIS and hasattr(water, '__module__') and 'MDAnalysis' in str(water.__module__):
+        if (
+            not _HAS_MDANALYSIS
+            and hasattr(water, "__module__")
+            and "MDAnalysis" in str(water.__module__)
+        ):
             raise NotImplementedError(
                 "WaterBridge with MDAnalysis objects is no longer supported. "
                 "Please use prolif.Molecule objects for water molecules instead."
             )
-        
+
         self.water = water
         # handle AtomGroup generated with `updating=True` automatically
         self.water_conv_kwargs = atomgroup_converter_kwargs or (

@@ -11,9 +11,11 @@ from typing import TYPE_CHECKING, Any, TypeVar, Union, overload
 
 try:
     import MDAnalysis as mda
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
+
     # ダミーモジュールを定義
     class _DummyMDA:
         class SelectionError(Exception):

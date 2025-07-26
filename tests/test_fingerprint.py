@@ -545,7 +545,7 @@ class TestFingerprint:
         fp = Fingerprint(["WaterBridge"], parameters={"WaterBridge": {"water": water}})
         assert fp._use_segid(lig, prot) is True
 
-        def patch_run_serial(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+        def patch_run_serial(_self, *_args, **_kwargs):  # type: ignore[no-untyped-def]
             return {0: {}}
 
         monkeypatch.setattr(fp, "_run_serial", patch_run_serial)
