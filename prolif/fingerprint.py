@@ -34,9 +34,27 @@ from typing import TYPE_CHECKING, Any, Literal, Optional, Union, cast, overload
 import dill
 import multiprocess as mp
 import numpy as np
-from MDAnalysis import AtomGroup
-from MDAnalysis.converters.RDKit import atomgroup_to_mol, set_converter_cache_size
-from MDAnalysis.coordinates.timestep import Timestep
+try:
+    from MDAnalysis import AtomGroup
+    from MDAnalysis.converters.RDKit import atomgroup_to_mol, set_converter_cache_size
+    from MDAnalysis.coordinates.timestep import Timestep
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+    # ダミー関数を定義
+    class atomgroup_to_mol:
+        @staticmethod
+        def cache_parameters():
+            return {"maxsize": 0}
+    
+    def set_converter_cache_size(size):
+        pass
+    
+    class AtomGroup:
+        pass
+    
+    class Timestep:
+        pass
 from rdkit import Chem
 from tqdm.auto import tqdm
 
@@ -597,6 +615,21 @@ class Fingerprint:
             Added `use_segid`.
 
         """  # noqa: E501
+        # MDAnalysis trajectory detection and error handling
+        if hasattr(traj, '__iter__') and not isinstance(traj, (str, bytes)):
+            # Check if it's likely an MDAnalysis trajectory object
+            traj_module = getattr(traj, '__module__', '')
+            if 'MDAnalysis' in str(traj_module) or hasattr(traj, 'trajectory'):
+                raise NotImplementedError(
+                    "MDAnalysis trajectory analysis is no longer supported. "
+                    "This function now only supports single structure analysis. "
+                    "Alternative approaches:\n"
+                    "  - For multiple structures: use run_from_iterable() with molecule suppliers\n"
+                    "  - For single structures: use generate() method\n"
+                    "  - For docking results: use sdf_supplier or pdbqt_supplier\n"
+                    "See documentation for detailed migration guide."
+                )
+        
         if n_jobs is not None and n_jobs < 1:
             raise ValueError("n_jobs must be > 0 or None")
         if converter_kwargs is not None and len(converter_kwargs) != 2:
@@ -656,7 +689,11 @@ class Fingerprint:
         return self
 
     def _use_segid(self, lig: "MDAObject", prot: "MDAObject") -> bool:
-        """Whether to use the segment index or the chainID as a chain."""
+        """Whether to use the segment index or the chainID as a chain (DEPRECATED)."""
+        if not _HAS_MDANALYSIS:
+            raise NotImplementedError(
+                "_use_segid() requires MDAnalysis, which is no longer supported."
+            )
         use_segid = Molecule._use_segid(lig) or Molecule._use_segid(prot)
         for interaction in self.bridged_interactions.values() or []:
             for obj in vars(interaction).values():

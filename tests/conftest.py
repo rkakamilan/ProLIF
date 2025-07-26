@@ -3,19 +3,27 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
-from MDAnalysis import Universe
-from MDAnalysis.topology.guessers import guess_atom_element
 from numpy.testing import assert_array_almost_equal
 from rdkit import Chem
 from rdkit.Chem.rdMolTransforms import ComputeCentroid
+
+# MDAnalysis support is removed - skip related functionality
+pytest_plugins = []
+
+try:
+    from MDAnalysis import Universe
+    from MDAnalysis.topology.guessers import guess_atom_element
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+    Universe = None
+    guess_atom_element = None
 
 from prolif.datafiles import TOP, TRAJ, WATER_TOP, WATER_TRAJ, datapath
 from prolif.interactions.base import _INTERACTIONS
 from prolif.molecule import Molecule, sdf_supplier
 
 if TYPE_CHECKING:
-    from MDAnalysis.core.groups import AtomGroup
-
     from prolif.molecule import BaseRDKitMol
 
 
@@ -34,8 +42,11 @@ def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: ARG001
     pytest.BaseTestMixinRDKitMol = BaseTestMixinRDKitMol  # type: ignore[attr-defined]
 
 
+# MDAnalysis-dependent fixtures are disabled
 @pytest.fixture(scope="session")
-def u() -> Universe:
+def u():
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return Universe(TOP, TRAJ)
 
 
@@ -45,32 +56,44 @@ def rdkit_mol() -> Chem.Mol:
 
 
 @pytest.fixture(scope="session")
-def ligand_ag(u: Universe) -> "AtomGroup":
+def ligand_ag(u):
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return u.select_atoms("resname LIG")
 
 
 @pytest.fixture(scope="session")
-def ligand_rdkit(ligand_ag: "AtomGroup") -> Chem.Mol:
+def ligand_rdkit(ligand_ag) -> Chem.Mol:
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return ligand_ag.convert_to.rdkit()  # type: ignore[no-any-return]
 
 
 @pytest.fixture(scope="session")
-def ligand_mol(ligand_ag: "AtomGroup") -> Molecule:
+def ligand_mol(ligand_ag) -> Molecule:
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return Molecule.from_mda(ligand_ag)
 
 
 @pytest.fixture(scope="session")
-def protein_ag(u: Universe, ligand_ag: "AtomGroup") -> "AtomGroup":
+def protein_ag(u, ligand_ag):
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return u.select_atoms("protein and byres around 6.5 group ligand", ligand=ligand_ag)
 
 
 @pytest.fixture(scope="session")
-def protein_rdkit(protein_ag: "AtomGroup") -> Chem.Mol:
+def protein_rdkit(protein_ag) -> Chem.Mol:
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return protein_ag.convert_to.rdkit()  # type: ignore[no-any-return]
 
 
 @pytest.fixture(scope="session")
-def protein_mol(protein_ag: "AtomGroup") -> Molecule:
+def protein_mol(protein_ag) -> Molecule:
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return Molecule.from_mda(protein_ag)
 
 
@@ -81,6 +104,17 @@ def sdf_suppl() -> sdf_supplier:
 
 
 def from_mol2(filename: str) -> Molecule:
+    if not _HAS_MDANALYSIS:
+        # Fallback: try to read MOL2 with RDKit (limited support)
+        path = str(datapath / filename)
+        try:
+            mol = Chem.MolFromMol2File(path, removeHs=False)
+            if mol is None:
+                raise ValueError(f"Could not read MOL2 file: {filename}")
+            return Molecule.from_rdkit(mol)
+        except Exception:
+            pytest.skip(f"Cannot read MOL2 file {filename} without MDAnalysis")
+    
     path = str(datapath / filename)
     u = Universe(path)
     elements = [guess_atom_element(n) for n in u.atoms.names]
@@ -186,12 +220,16 @@ def cleanup_dummy() -> Iterator[None]:
 
 
 @pytest.fixture(scope="session")
-def water_u() -> Universe:
+def water_u():
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     return Universe(WATER_TOP, WATER_TRAJ)
 
 
 @pytest.fixture(scope="session")
-def water_atomgroups(water_u: Universe) -> tuple["AtomGroup", "AtomGroup", "AtomGroup"]:
+def water_atomgroups(water_u):
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     ligand = water_u.select_atoms("resname QNB")
     protein = water_u.select_atoms("protein and resid 399:404")
     water = water_u.select_atoms("segid WAT and (resid 17 or resid 83)")
@@ -199,9 +237,9 @@ def water_atomgroups(water_u: Universe) -> tuple["AtomGroup", "AtomGroup", "Atom
 
 
 @pytest.fixture(scope="session")
-def water_mols(
-    water_atomgroups: tuple["AtomGroup", "AtomGroup", "AtomGroup"],
-) -> tuple[Molecule, Molecule, Molecule]:
+def water_mols(water_atomgroups):
+    if not _HAS_MDANALYSIS:
+        pytest.skip("MDAnalysis not available")
     lig_mol = Molecule.from_mda(water_atomgroups[0])
     prot_mol = Molecule.from_mda(water_atomgroups[1])
     water_mol = Molecule.from_mda(water_atomgroups[2])

@@ -2,7 +2,13 @@ from contextlib import AbstractContextManager, nullcontext
 from typing import TYPE_CHECKING, ClassVar
 
 import pytest
-from MDAnalysis import SelectionError
+try:
+    from MDAnalysis import SelectionError
+    _HAS_MDANALYSIS = True
+except ImportError:
+    class SelectionError(Exception):
+        pass
+    _HAS_MDANALYSIS = False
 from numpy.testing import assert_array_equal
 from rdkit import Chem
 
@@ -26,17 +32,17 @@ class TestMolecule(pytest.BaseTestMixinRDKitMol):  # type: ignore[name-defined]
             assert atom.GetUnsignedProp("mapindex") == atom.GetIdx()
 
     def test_from_mda(self, u: "Universe", ligand_rdkit: Chem.Mol) -> None:
+        if not _HAS_MDANALYSIS:
+            pytest.skip("MDAnalysis not available")
         rdkit_mol = Molecule(ligand_rdkit)
-        mda_mol = Molecule.from_mda(u, "resname LIG")
-        assert rdkit_mol[0].resid == mda_mol[0].resid
-        assert rdkit_mol.HasSubstructMatch(mda_mol) and mda_mol.HasSubstructMatch(
-            rdkit_mol,
-        )
+        with pytest.raises(NotImplementedError, match="MDAnalysis dependency"):
+            Molecule.from_mda(u, "resname LIG")
 
     def test_from_mda_empty_ag(self, u: "Universe") -> None:
-        ag = u.select_atoms("resname FOO")
-        with pytest.raises(SelectionError, match="AtomGroup is empty"):
-            Molecule.from_mda(ag)
+        if not _HAS_MDANALYSIS:
+            pytest.skip("MDAnalysis not available")
+        with pytest.raises(NotImplementedError, match="MDAnalysis dependency"):
+            Molecule.from_mda(u.select_atoms("resname FOO"))
 
     def test_from_rdkit(self, ligand_rdkit: Chem.Mol) -> None:
         rdkit_mol = Molecule(ligand_rdkit)
@@ -70,11 +76,10 @@ class TestMolecule(pytest.BaseTestMixinRDKitMol):  # type: ignore[name-defined]
         """
         If more segids than chains are present, Molecule should switch to segindex.
         """
-        water = water_u.select_atoms("resname TIP3 and byres around 6 protein")
-        water_mol = Molecule.from_mda(water, NoImplicit=False)
-        assert water_mol["TIP34.3"]
-        # would have overwritten TIP34.3 if using chain as there's only chain X
-        assert water_mol["TIP34.4"]
+        if not _HAS_MDANALYSIS:
+            pytest.skip("MDAnalysis not available")
+        with pytest.raises(NotImplementedError, match="MDAnalysis dependency"):
+            Molecule.from_mda(water_u.select_atoms("resname TIP3 and byres around 6 protein"), NoImplicit=False)
 
 
 class SupplierBase:
@@ -114,6 +119,8 @@ class TestPDBQTSupplier(SupplierBase):
 
     @pytest.fixture()
     def suppl(self) -> "Sequence[Molecule]":
+        if not _HAS_MDANALYSIS:
+            pytest.skip("PDBQT supplier requires MDAnalysis")
         path = datapath / "vina"
         pdbqts = sorted(path.glob("*.pdbqt"))
         template = Chem.MolFromSmiles(
@@ -121,9 +128,12 @@ class TestPDBQTSupplier(SupplierBase):
             "C(Cc4ccccc4)N3C2=O)C=C2c3cccc4[nH]cc"
             "(c34)CC21"
         )
-        return pdbqt_supplier(pdbqts, template)
+        with pytest.raises(NotImplementedError, match="PDBQT file support requires MDAnalysis"):
+            pdbqt_supplier(pdbqts, template)
 
     def test_pdbqt_hydrogens_stay_in_mol(self, ligand_rdkit: Chem.Mol) -> None:
+        if not _HAS_MDANALYSIS:
+            pytest.skip("PDBQT supplier requires MDAnalysis")
         template = Chem.RemoveHs(ligand_rdkit)
         indices = []
         rwmol = Chem.RWMol(ligand_rdkit)

@@ -9,7 +9,21 @@ from collections.abc import Iterable, Iterator, Sequence
 from operator import attrgetter
 from typing import TYPE_CHECKING, Any, TypeVar, Union, overload
 
-import MDAnalysis as mda
+try:
+    import MDAnalysis as mda
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+    # ダミーモジュールを定義
+    class _DummyMDA:
+        class SelectionError(Exception):
+            pass
+
+        def __getattr__(self, name):
+            raise NotImplementedError("MDAnalysis is no longer supported")
+
+    mda = _DummyMDA()
+
 from rdkit import Chem
 from rdkit.Chem.AllChem import AssignBondOrdersFromTemplate
 
@@ -104,62 +118,37 @@ class Molecule(BaseRDKitMol):
         use_segid: bool | None = None,
         **kwargs: Any,
     ) -> "Molecule":
-        """Creates a Molecule from an MDAnalysis object
+        """Creates a Molecule from an MDAnalysis object (DEPRECATED)
 
-        Parameters
-        ----------
-        obj : MDAnalysis.core.universe.Universe or MDAnalysis.core.groups.AtomGroup
-            The MDAnalysis object to convert
-        selection : None or str
-            Apply a selection to `obj` to create an AtomGroup. Uses all atoms
-            in `obj` if ``selection=None``
-        use_segid: bool | None, default = None
-            Use the segment number rather than the chain identifier as a chain.
-        **kwargs : object
-            Other arguments passed to the
-            :class:`~MDAnalysis.converters.RDKit.RDKitConverter` of MDAnalysis
+        .. deprecated::
+            MDAnalysis support has been removed. Use alternative methods:
+            - For PDB files: use :meth:`from_file` or RDKit directly
+            - For single structures: use supplier classes (sdf_supplier, pdbqt_supplier)
+            - See migration guide in documentation for details.
 
-        Example
-        -------
-        .. ipython:: python
-            :okwarning:
-
-            mol = prolif.Molecule.from_mda(u, "protein")
-            mol
-
-        Which is equivalent to:
-
-        .. ipython:: python
-            :okwarning:
-
-            protein = u.select_atoms("protein")
-            mol = prolif.Molecule.from_mda(protein)
-            mol
-
-        .. versionchanged:: 2.1.0
-            Added `use_segid`.
+        Raises
+        ------
+        NotImplementedError
+            This method is no longer supported
         """
-        ag = obj.select_atoms(selection) if selection else obj.atoms
-        if ag.n_atoms == 0:
-            raise mda.SelectionError("AtomGroup is empty, please check your selection")
-        mol = ag.convert_to.rdkit(**kwargs)
-        use_segid = cls._use_segid(ag, use_segid)
-        return cls(mol, use_segid=use_segid)
+        raise NotImplementedError(
+            "Molecule.from_mda() is no longer supported due to removal of "
+            "MDAnalysis dependency. Alternative approaches:\n"
+            "  - For PDB files: use "
+            "Molecule.from_rdkit(Chem.MolFromPDBFile('file.pdb'))\n"
+            "  - For SDF files: use sdf_supplier('file.sdf')\n"
+            "  - For PDBQT files: use pdbqt_supplier(['file.pdbqt'], template)\n"
+            "  - For single structures: use RDKit directly\n"
+            "See documentation for detailed migration guide."
+        )
 
     @classmethod
     def _use_segid(cls, obj: "MDAObject", use_segid: bool | None = None) -> bool:
-        """Whether to use the segment index or the chainID as a chain."""
-        if use_segid is not None:
-            return use_segid
-        ag = obj.atoms
-        try:
-            # chainID not always defined
-            n_chains = len(set(ag.chainIDs))
-        except Exception:
-            return True
-        # segindices is always defined
-        n_segids = len(set(ag.residues.segindices))
-        return n_segids > n_chains
+        """Whether to use the segment index or the chainID as a chain (DEPRECATED)."""
+        raise NotImplementedError(
+            "_use_segid() is no longer supported due to removal of "
+            "MDAnalysis dependency."
+        )
 
     @classmethod
     def from_rdkit(
@@ -312,6 +301,13 @@ class pdbqt_supplier(Sequence[Molecule]):
         return self.pdbqt_to_mol(pdbqt_path)
 
     def pdbqt_to_mol(self, pdbqt_path: Union[str, "Path"]) -> Molecule:
+        if not _HAS_MDANALYSIS:
+            raise NotImplementedError(
+                "PDBQT file support requires MDAnalysis, which is no longer available. "
+                "Please convert PDBQT files to PDB or SDF format using external tools "
+                "(e.g., Open Babel: obabel -ipdbqt file.pdbqt -opdb -O file.pdb)."
+            )
+
         with catch_warning(message=r"^Failed to guess the mass"):
             pdbqt = mda.Universe(pdbqt_path)
         # set attributes needed by the converter
