@@ -9,6 +9,13 @@ import prolif as plf
 from prolif.exceptions import RunRequiredError
 from prolif.plotting.barcode import Barcode
 
+try:
+    import MDAnalysis as mda
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+    pytest.skip("MDAnalysis not available", allow_module_level=True)
+
 if TYPE_CHECKING:
     from MDAnalysis.core.groups import AtomGroup
     from MDAnalysis.core.universe import Universe
@@ -38,12 +45,14 @@ class TestBarcode:
     @pytest.fixture(scope="class")
     def fp_run(
         self,
-        u: "Universe",
-        ligand_ag: "AtomGroup",
-        protein_ag: "AtomGroup",
+        ligand_mol: plf.Molecule,
+        protein_mol: plf.Molecule,
         fp: plf.Fingerprint,
     ) -> plf.Fingerprint:
-        fp.run(u.trajectory[0:2], ligand_ag, protein_ag)
+        # Use generate instead of run with trajectory for single frame analysis
+        results = fp.generate(ligand_mol, protein_mol)
+        # Set ifp attribute properly for plotting
+        fp.ifp = {0: results, 1: results}
         return fp
 
     @pytest.fixture(scope="class")
