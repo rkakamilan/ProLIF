@@ -10,6 +10,7 @@ from rdkit import Chem
 
 try:
     import MDAnalysis as mda
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False

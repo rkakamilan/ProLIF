@@ -9,6 +9,7 @@ from prolif.residue import Residue, ResidueGroup, ResidueId
 
 try:
     import MDAnalysis as mda
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False

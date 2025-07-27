@@ -8,6 +8,7 @@ from rdkit import Chem, RDLogger
 try:
     import MDAnalysis as mda
     from MDAnalysis.transformations import rotateby, translate
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
