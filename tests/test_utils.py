@@ -8,6 +8,12 @@ import pytest
 from numpy.testing import assert_equal
 from rdkit import Chem
 
+try:
+    import MDAnalysis as mda
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+
 from prolif.ifp import IFP
 from prolif.residue import Residue, ResidueGroup, ResidueId
 from prolif.utils import (
@@ -135,6 +141,7 @@ def test_angle_limits(
     assert angle_between_limits(angle, mina, maxa, ring=ring) is expected
 
 
+@pytest.mark.skipif(not _HAS_MDANALYSIS, reason="Requires MDAnalysis")
 def test_pocket_residues(ligand_mol: "Chem.Mol", protein_mol: "Chem.Mol") -> None:
     resids = get_residues_near_ligand(ligand_mol, protein_mol)
     residues = [

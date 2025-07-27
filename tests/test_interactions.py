@@ -1,11 +1,17 @@
 from abc import abstractmethod
 from typing import TYPE_CHECKING, Literal, cast
 
-import MDAnalysis as mda
 import numpy as np
 import pytest
-from MDAnalysis.transformations import rotateby, translate
 from rdkit import Chem, RDLogger
+
+try:
+    import MDAnalysis as mda
+    from MDAnalysis.transformations import rotateby, translate
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+    pytest.skip("MDAnalysis not available", allow_module_level=True)
 
 import prolif
 from prolif.fingerprint import Fingerprint
