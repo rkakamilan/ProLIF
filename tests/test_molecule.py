@@ -120,13 +120,12 @@ class SupplierBase:
                 assert_array_equal(mols[index].xyz, mol.xyz)
 
 
+@pytest.mark.skipif(not _HAS_MDANALYSIS, reason="PDBQT supplier requires MDAnalysis")
 class TestPDBQTSupplier(SupplierBase):
     resid = ResidueId("LIG", 1, "G")
 
     @pytest.fixture()
     def suppl(self) -> "Sequence[Molecule]":
-        if not _HAS_MDANALYSIS:
-            pytest.skip("PDBQT supplier requires MDAnalysis")
         path = datapath / "vina"
         pdbqts = sorted(path.glob("*.pdbqt"))
         template = Chem.MolFromSmiles(
@@ -134,10 +133,7 @@ class TestPDBQTSupplier(SupplierBase):
             "C(Cc4ccccc4)N3C2=O)C=C2c3cccc4[nH]cc"
             "(c34)CC21"
         )
-        with pytest.raises(
-            NotImplementedError, match="PDBQT file support requires MDAnalysis"
-        ):
-            pdbqt_supplier(pdbqts, template)
+        return pdbqt_supplier(pdbqts, template)
 
     def test_pdbqt_hydrogens_stay_in_mol(self, ligand_rdkit: Chem.Mol) -> None:
         if not _HAS_MDANALYSIS:

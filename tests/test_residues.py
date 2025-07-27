@@ -7,6 +7,13 @@ from rdkit.Chem.rdDistGeom import EmbedMolecule
 
 from prolif.residue import Residue, ResidueGroup, ResidueId
 
+try:
+    import MDAnalysis as mda
+
+    _HAS_MDANALYSIS = True
+except ImportError:
+    _HAS_MDANALYSIS = False
+
 if TYPE_CHECKING:
     from prolif.molecule import Molecule
 
@@ -250,6 +257,7 @@ class TestResidueGroup:
         with pytest.raises(KeyError, match="Expected a ResidueId, int, or str"):
             rg[1.5]  # type: ignore[index]
 
+    @pytest.mark.skipif(not _HAS_MDANALYSIS, reason="Requires MDAnalysis")
     def test_select(self, protein_mol: "Molecule") -> None:
         rg = protein_mol.residues
         assert rg.select(rg.name == "TYR").n_residues == 6
@@ -265,6 +273,7 @@ class TestResidueGroup:
         # not
         assert rg.select(~(rg.chain == "A")).n_residues == 20
 
+    @pytest.mark.skipif(not _HAS_MDANALYSIS, reason="Requires MDAnalysis")
     def test_select_sameas_getitem(self, protein_mol: "Molecule") -> None:
         rg = protein_mol.residues
         sel = rg.select((rg.name == "TYR") & (rg.number == 38))[0]
