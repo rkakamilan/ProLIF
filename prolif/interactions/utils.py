@@ -38,14 +38,14 @@ def get_mapindex(res: "Residue", index: int) -> int:
 def _distance_3args_l1_p1(
     l1: "Point3D",
     p1: "Point3D",
-    p2: "Point3D",  # noqa: ARG001
+    p2: "Point3D",
 ) -> float:
     return l1.Distance(p1)
 
 
 def _distance_3args_l1_p2(
     l1: "Point3D",
-    p1: "Point3D",  # noqa: ARG001
+    p1: "Point3D",
     p2: "Point3D",
 ) -> float:
     return l1.Distance(p2)
@@ -53,35 +53,35 @@ def _distance_3args_l1_p2(
 
 def _distance_4args_l1_p1(
     l1: "Point3D",
-    l2: "Point3D",  # noqa: ARG001
+    l2: "Point3D",
     p1: "Point3D",
-    p2: "Point3D",  # noqa: ARG001
+    p2: "Point3D",
 ) -> float:
     return l1.Distance(p1)
 
 
 def _distance_4args_l1_p2(
     l1: "Point3D",
-    l2: "Point3D",  # noqa: ARG001
-    p1: "Point3D",  # noqa: ARG001
+    l2: "Point3D",
+    p1: "Point3D",
     p2: "Point3D",
 ) -> float:
     return l1.Distance(p2)
 
 
 def _distance_4args_l2_p1(
-    l1: "Point3D",  # noqa: ARG001
+    l1: "Point3D",
     l2: "Point3D",
     p1: "Point3D",
-    p2: "Point3D",  # noqa: ARG001
+    p2: "Point3D",
 ) -> float:
     return l2.Distance(p1)
 
 
 def _distance_4args_l2_p2(
-    l1: "Point3D",  # noqa: ARG001
+    l1: "Point3D",
     l2: "Point3D",
-    p1: "Point3D",  # noqa: ARG001
+    p1: "Point3D",
     p2: "Point3D",
 ) -> float:
     return l2.Distance(p2)

@@ -25,7 +25,7 @@ from prolif.interactions.base import (
     Interaction,
     SingleAngle,
 )
-from prolif.interactions.constants import VDW_PRESETS, VDWRADII  # noqa
+from prolif.interactions.constants import VDW_PRESETS, VDWRADII
 from prolif.utils import angle_between_limits, get_centroid, get_ring_normal_vector
 
 if TYPE_CHECKING:

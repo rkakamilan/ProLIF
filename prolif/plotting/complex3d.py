@@ -100,7 +100,7 @@ class Complex3D:
         aren't involved in an interaction. Added ``only_interacting`` parameter to the
         ``display`` and ``compare`` methods to show all protein residues in the
         vicinity of the ligand, or only the ones participating in an interaction.
-    """  # noqa: E501
+    """
 
     COLORS: ClassVar[dict[str, str]] = {**separated_interaction_colors}
     LIGAND_STYLE: ClassVar[dict] = {"stick": {"colorscheme": "cyanCarbon"}}
@@ -507,7 +507,12 @@ class Complex3D:
 
         # show protein
         mol = Chem.RemoveAllHs(self.prot_mol, sanitize=False)
-        pdb = Chem.MolToPDBBlock(mol, flavor=0x20 | 0x10)
+        try:
+            pdb = Chem.MolToPDBBlock(mol, flavor=0x20 | 0x10)
+        except Chem.rdchem.KekulizeException:
+            # Fallback: try with different sanitization settings
+            mol = Chem.RemoveAllHs(self.prot_mol, sanitize=True)
+            pdb = Chem.MolToPDBBlock(mol, flavor=0x20 | 0x10)
         v.addModel(pdb, "pdb", viewer=position)
         model = v.getModel(viewer=position)
         model.setStyle({}, self.PROTEIN_STYLE)

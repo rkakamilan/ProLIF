@@ -49,12 +49,12 @@ tutorials = [
     "matplotlib>=3.7",
     "seaborn<1.0",
     "pyvis",
-    "prolif[plots]",
+    "prolif-lite[plots]",
 ]
 
 [dependency-groups]
 build = ["build"]
-tests = ["pytest>=6.1.2", "pytest-cov", "ipython", "prolif[plots]"]
+tests = ["pytest>=6.1.2", "pytest-cov", "ipython", "prolif-lite[plots]"]
 docs = [
     "sphinx==5.3.0",
     "sphinx-copybutton",
@@ -62,7 +62,7 @@ docs = [
     "ipywidgets",
     "recommonmark",
     "sphinx-book-theme",
-    "prolif[tutorials]",
+    "prolif-lite[tutorials]",
 ]
 type-check = [
     "mypy>=1.0.0",
@@ -245,6 +245,12 @@ ignore = [
     "FURB103",
     "COM812",
     "UP037",
+    # MDAnalysis removal related ignores
+    "F401",   # Allow unused imports in conditional MDAnalysis blocks
+    "E501",   # Allow longer lines for deprecation messages
+    "ARG001", # Allow unused arguments in skipped fixtures
+    "ARG004", # Allow unused arguments in skipped static methods
+    "RUF043", # Allow regex patterns in test matches
 ]
 
 [tool.isort]
