@@ -8,14 +8,14 @@ from prolif.residue import ResidueId
 
 try:
     import MDAnalysis as mda
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
     pytest.skip("MDAnalysis not available", allow_module_level=True)
 
 if TYPE_CHECKING:
-    from MDAnalysis.core.groups import AtomGroup
-    from MDAnalysis.core.universe import Universe
+    pass
 
 
 @pytest.fixture(scope="session")
@@ -40,7 +40,7 @@ def test_ifp_filtering(ifp: IFP) -> None:
     # Check that filtering by ligand returns the same IFP
     assert isinstance(ifp[lig_id], IFP)
     # Check filtering by protein residue
-    if prot_id in [str(k[1]) for k in ifp.keys()]:
+    if prot_id in [str(k[1]) for k in ifp]:
         prot_filtered = ifp[prot_id]
         assert isinstance(prot_filtered, IFP)
         assert len(prot_filtered) <= len(ifp)

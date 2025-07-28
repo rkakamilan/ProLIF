@@ -8,6 +8,7 @@ from prolif.plotting.complex3d import Complex3D
 
 try:
     import MDAnalysis as mda
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
@@ -32,25 +33,27 @@ class TestComplex3D:
     ) -> tuple[plf.Fingerprint, plf.Molecule, plf.Molecule]:
         # Use SDF and PDB files instead of MDAnalysis trajectory
         from prolif.datafiles import datapath
+
         sdf_path = datapath / "vina" / "vina_output.sdf"
         pdb_path = datapath / "top.pdb"
-        
+
         from rdkit import Chem
+
         from prolif.molecule import sdf_supplier
-        
+
         # Load ligand from SDF
         lig_suppl = sdf_supplier(str(sdf_path))
-        lig_mol = list(lig_suppl)[0]
-        
+        lig_mol = next(iter(lig_suppl))
+
         # Load protein from PDB
         prot_rdkit = Chem.MolFromPDBFile(str(pdb_path), removeHs=False)
         if prot_rdkit is None:
             pytest.skip("Could not load protein PDB")
         prot_mol = plf.Molecule.from_rdkit(prot_rdkit)
-        
+
         # Use run_from_iterable to create proper IFP structure
         fp.run_from_iterable([lig_mol], prot_mol)
-        
+
         return fp, lig_mol, prot_mol
 
     @pytest.fixture(scope="class")
@@ -132,7 +135,9 @@ class TestComplex3D:
         plot_3d.display()
         plot_3d._populate_view(plot_3d)
 
-    @pytest.mark.skip(reason="WaterBridge functionality requires more complex implementation")
+    @pytest.mark.skip(
+        reason="WaterBridge functionality requires more complex implementation"
+    )
     def test_water(
         self, water_mols: tuple[plf.Molecule, plf.Molecule, plf.Molecule]
     ) -> None:

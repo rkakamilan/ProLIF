@@ -619,7 +619,7 @@ class Fingerprint:
         .. versionchanged:: 2.1.0
             Added `use_segid`.
 
-        """  # noqa: E501
+        """
         # MDAnalysis trajectory detection and error handling
         if hasattr(traj, "__iter__") and not isinstance(traj, str | bytes):
             # Check if it's likely an MDAnalysis trajectory object
@@ -963,7 +963,7 @@ class Fingerprint:
             An MDAnalysis AtomGroup for the protein (with multiple residues)
 
         .. versionadded:: 2.1.0
-        """  # noqa: E501
+        """
         self.ifp = cast("IFPResults", getattr(self, "ifp", {}))
         for interaction in self.bridged_interactions.values():
             interaction.setup(ifp_store=self.ifp, **kwargs)
@@ -1178,7 +1178,7 @@ class Fingerprint:
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore",
-                r"The .+ interaction has been superseded by a new class",  # pragma: no cover  # noqa: E501
+                r"The .+ interaction has been superseded by a new class",  # pragma: no cover
             )
             if isinstance(path_or_bytes, bytes):
                 return dill.loads(path_or_bytes)  # type: ignore[no-any-return]

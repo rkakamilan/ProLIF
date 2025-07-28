@@ -100,7 +100,7 @@ class Complex3D:
         aren't involved in an interaction. Added ``only_interacting`` parameter to the
         ``display`` and ``compare`` methods to show all protein residues in the
         vicinity of the ligand, or only the ones participating in an interaction.
-    """  # noqa: E501
+    """
 
     COLORS: ClassVar[dict[str, str]] = {**separated_interaction_colors}
     LIGAND_STYLE: ClassVar[dict] = {"stick": {"colorscheme": "cyanCarbon"}}

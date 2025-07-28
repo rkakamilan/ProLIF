@@ -1,7 +1,6 @@
 from collections.abc import Iterator
 from typing import TYPE_CHECKING
 
-import numpy as np
 import pytest
 from numpy.testing import assert_array_almost_equal
 from rdkit import Chem
@@ -28,7 +27,7 @@ if TYPE_CHECKING:
     from prolif.molecule import BaseRDKitMol
 
 
-def pytest_sessionstart(session: pytest.Session) -> None:  # noqa: ARG001
+def pytest_sessionstart(session: pytest.Session) -> None:
     if not datapath.exists():
         pytest.exit(
             f"Example data files are not accessible: {datapath!s} does not exist",
@@ -76,8 +75,10 @@ def ligand_mol(ligand_ag) -> Molecule:
         pytest.skip("MDAnalysis not available")
     # Use SDF supplier instead of from_mda to avoid NotImplementedError
     from prolif.datafiles import datapath
+
     sdf_path = datapath / "vina" / "vina_output.sdf"
     from prolif.molecule import sdf_supplier
+
     mols = list(sdf_supplier(str(sdf_path)))
     return mols[0]  # Return first molecule from SDF
 
@@ -102,8 +103,10 @@ def protein_mol(protein_ag) -> Molecule:
         pytest.skip("MDAnalysis not available")
     # Use PDB file instead of from_mda to avoid NotImplementedError
     from prolif.datafiles import datapath
+
     pdb_path = datapath / "top.pdb"
     from rdkit import Chem
+
     mol = Chem.MolFromPDBFile(str(pdb_path), removeHs=False)
     if mol is None:
         pytest.skip("Could not load protein PDB file")
@@ -118,8 +121,10 @@ def sdf_suppl() -> sdf_supplier:
 
 def from_mol2(filename: str) -> Molecule:
     # MOL2-based tests are deprecated due to MDAnalysis dependency removal
-    # Skip all MOL2-based tests  
-    pytest.skip(f"MOL2 file {filename} tests skipped due to MDAnalysis dependency removal")
+    # Skip all MOL2-based tests
+    pytest.skip(
+        f"MOL2 file {filename} tests skipped due to MDAnalysis dependency removal"
+    )
 
 
 @pytest.fixture(scope="session")
@@ -241,28 +246,31 @@ def water_mols(water_atomgroups):
         pytest.skip("MDAnalysis not available")
     # Load from files instead of using from_mda to avoid NotImplementedError
     from prolif.datafiles import datapath
-    
+
     # Load ligand from SDF
     sdf_path = datapath / "vina" / "vina_output.sdf"
     from prolif.molecule import sdf_supplier
+
     lig_mols = list(sdf_supplier(str(sdf_path)))
     lig_mol = lig_mols[0]
-    
+
     # Load protein from PDB
     pdb_path = datapath / "water_m2.pdb"
     from rdkit import Chem
+
     prot_rdkit = Chem.MolFromPDBFile(str(pdb_path), removeHs=False)
     if prot_rdkit is None:
         pytest.skip("Could not load protein PDB for water tests")
     prot_mol = Molecule.from_rdkit(prot_rdkit)
-    
+
     # Create a simple water molecule
     water_rdkit = Chem.MolFromSmiles("O")
     water_rdkit = Chem.AddHs(water_rdkit)
     from rdkit.Chem import rdDistGeom
+
     rdDistGeom.EmbedMolecule(water_rdkit)
     water_mol = Molecule.from_rdkit(water_rdkit)
-    
+
     return lig_mol, prot_mol, water_mol
 
 

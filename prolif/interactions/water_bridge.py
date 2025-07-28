@@ -145,7 +145,7 @@ class WaterBridge(BridgedInteraction):
             An MDAnalysis AtomGroup for the ligand
         prot : MDAnalysis.core.groups.AtomGroup
             An MDAnalysis AtomGroup for the protein (with multiple residues)
-        """  # noqa: E501
+        """
         water_obj = cast("MDAObject", self.water)
         # Run analysis for ligand-water and water-protein interactions
         lig_water_ifp: dict[int, IFP] = self.water_fp._run_serial(

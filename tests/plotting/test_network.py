@@ -1,5 +1,4 @@
 from functools import partial
-from html import escape
 from typing import TYPE_CHECKING, cast
 
 import pytest
@@ -10,6 +9,7 @@ from prolif.plotting.network import LigNetwork
 
 try:
     import MDAnalysis as mda
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
@@ -36,25 +36,27 @@ class TestLigNetwork:
     def fp_mol(self, fp: plf.Fingerprint) -> tuple[plf.Fingerprint, plf.Molecule]:
         # Use SDF and PDB files instead of MDAnalysis trajectory
         from prolif.datafiles import datapath
+
         sdf_path = datapath / "vina" / "vina_output.sdf"
         pdb_path = datapath / "top.pdb"
-        
+
         from rdkit import Chem
+
         from prolif.molecule import sdf_supplier
-        
+
         # Load ligand from SDF
         lig_suppl = sdf_supplier(str(sdf_path))
-        lig_mol = list(lig_suppl)[0]
-        
+        lig_mol = next(iter(lig_suppl))
+
         # Load protein from PDB
         prot_rdkit = Chem.MolFromPDBFile(str(pdb_path), removeHs=False)
         if prot_rdkit is None:
             pytest.skip("Could not load protein PDB")
         prot_mol = plf.Molecule.from_rdkit(prot_rdkit)
-        
+
         # Use run_from_iterable to create proper IFP structure
         fp.run_from_iterable([lig_mol], prot_mol)
-        
+
         return fp, lig_mol
 
     @pytest.fixture(scope="class")
@@ -79,7 +81,9 @@ class TestLigNetwork:
         assert view._iframe
         html = view._iframe
         # Check that HTML contains expected network elements (adjust for actual data)
-        assert "PHE" in html or "UNL" in html  # Check for residue names from actual data
+        assert (
+            "PHE" in html or "UNL" in html
+        )  # Check for residue names from actual data
         if fp.count:
             # For count fingerprints, just check basic HTML structure
             assert "nodes" in html or "edges" in html
@@ -134,7 +138,9 @@ class TestLigNetwork:
         view = fp.plot_lignetwork(lig_mol, show_interaction_data=True)
         assert view._iframe
         # Check for basic HTML structure instead of specific text
-        assert "iframe" in view._iframe and ("nodes" in view._iframe or "edges" in view._iframe)
+        assert "iframe" in view._iframe and (
+            "nodes" in view._iframe or "edges" in view._iframe
+        )
 
     def test_fp_plot_lignetwork(
         self, fp_mol: tuple[plf.Fingerprint, plf.Molecule]
@@ -144,7 +150,9 @@ class TestLigNetwork:
         assert view._iframe
         assert "<iframe" in view._iframe
 
-    @pytest.mark.skip(reason="WaterBridge functionality requires more complex implementation")
+    @pytest.mark.skip(
+        reason="WaterBridge functionality requires more complex implementation"
+    )
     def test_water(
         self, water_mols: tuple[plf.Molecule, plf.Molecule, plf.Molecule]
     ) -> None:

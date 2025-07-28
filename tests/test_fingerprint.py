@@ -9,11 +9,15 @@ from rdkit.DataStructs import ExplicitBitVect, UIntSparseIntVect
 try:
     import MDAnalysis as mda
     from MDAnalysis.converters.RDKit import set_converter_cache_size
+
     _HAS_MDANALYSIS = True
 except ImportError:
     _HAS_MDANALYSIS = False
     # Skip tests requiring MDAnalysis when it's not available
-    pytest.skip("MDAnalysis not available - fingerprint tests require it", allow_module_level=True)
+    pytest.skip(
+        "MDAnalysis not available - fingerprint tests require it",
+        allow_module_level=True,
+    )
 
 from prolif.datafiles import datapath
 from prolif.fingerprint import DEFAULT_INTERACTIONS, Fingerprint
@@ -32,7 +36,7 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def dummy_cls(cleanup_dummy: "Iterator[None]") -> type[Interaction]:  # noqa: ARG001
+def dummy_cls(cleanup_dummy: "Iterator[None]") -> type[Interaction]:
     class Dummy(Interaction):
         def detect(
             self, res1: "Molecule", res2: "Molecule"
@@ -117,8 +121,7 @@ class TestFingerprint:
             )
         if "HBDonor" in metadata:
             assert all(
-                isinstance(hb["indices"]["ligand"], tuple)
-                for hb in metadata["HBDonor"]
+                isinstance(hb["indices"]["ligand"], tuple) for hb in metadata["HBDonor"]
             )
 
     @pytest.mark.skip(reason="Trajectory analysis requires MDAnalysis functionality")
@@ -166,7 +169,9 @@ class TestFingerprint:
         assert (lig_id, res) in fp_simple.ifp[0]
         u.trajectory[0]
 
-    @pytest.mark.skip(reason="generate method test needs adjustment for MDAnalysis removal")
+    @pytest.mark.skip(
+        reason="generate method test needs adjustment for MDAnalysis removal"
+    )
     def test_generate(
         self, fp_simple: Fingerprint, ligand_mol: "Molecule", protein_mol: "Molecule"
     ) -> None:
@@ -176,7 +181,9 @@ class TestFingerprint:
         assert isinstance(bv, np.ndarray)
         assert bv[0] is np.True_
 
-    @pytest.mark.skip(reason="generate metadata test needs adjustment for MDAnalysis removal")
+    @pytest.mark.skip(
+        reason="generate metadata test needs adjustment for MDAnalysis removal"
+    )
     def test_generate_metadata(
         self, fp_simple: Fingerprint, ligand_mol: "Molecule", protein_mol: "Molecule"
     ) -> None:
@@ -284,7 +291,9 @@ class TestFingerprint:
         resids = {key for d in fp_simple.ifp.values() for key in d}
         assert df.shape == (3, len(resids))
 
-    @pytest.mark.skip(reason="to_bitvector test needs adjustment for MDAnalysis removal")
+    @pytest.mark.skip(
+        reason="to_bitvector test needs adjustment for MDAnalysis removal"
+    )
     def test_to_bitvector(
         self,
         fp_simple: Fingerprint,
@@ -305,7 +314,9 @@ class TestFingerprint:
         assert isinstance(bvs[0], ExplicitBitVect)
         assert len(bvs) == 3
 
-    @pytest.mark.skip(reason="to_countvectors test needs adjustment for MDAnalysis removal")
+    @pytest.mark.skip(
+        reason="to_countvectors test needs adjustment for MDAnalysis removal"
+    )
     def test_to_countvectors(
         self,
         fp_count: Fingerprint,
@@ -513,7 +524,9 @@ class TestFingerprint:
         ):
             Fingerprint(["WaterBridge"])
 
-    @pytest.mark.skip(reason="Water bridge with trajectory requires MDAnalysis functionality")
+    @pytest.mark.skip(
+        reason="Water bridge with trajectory requires MDAnalysis functionality"
+    )
     def test_mix_water_bridge_and_other_interactions(
         self,
         water_u: mda.Universe,
@@ -528,7 +541,9 @@ class TestFingerprint:
         assert "WaterBridge" in fp.ifp[0]["QNB1.X", "TRP400.X"]
         assert "HBDonor" in fp.ifp[0]["QNB1.X", "ASN404.X"]
 
-    @pytest.mark.skip(reason="Water bridge with trajectory requires MDAnalysis functionality")
+    @pytest.mark.skip(
+        reason="Water bridge with trajectory requires MDAnalysis functionality"
+    )
     def test_water_bridge_run_iter(
         self, water_mols: tuple["Molecule", "Molecule", "Molecule"]
     ) -> None:
@@ -541,7 +556,9 @@ class TestFingerprint:
         assert "WaterBridge" in fp.ifp[0]["QNB1.X", "TRP400.X"]
         assert "HBDonor" in fp.ifp[0]["QNB1.X", "ASN404.X"]
 
-    @pytest.mark.skip(reason="Water bridge with trajectory requires MDAnalysis functionality")
+    @pytest.mark.skip(
+        reason="Water bridge with trajectory requires MDAnalysis functionality"
+    )
     def test_water_bridge_updates_cache_size(
         self,
         water_u: mda.Universe,

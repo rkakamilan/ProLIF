@@ -4,7 +4,6 @@ Reading proteins and ligands --- :mod:`prolif.molecule`
 """
 
 import copy
-from collections import defaultdict
 from collections.abc import Iterable, Iterator, Sequence
 from operator import attrgetter
 from typing import TYPE_CHECKING, Any, TypeVar, Union, overload
@@ -27,11 +26,10 @@ except ImportError:
     mda = _DummyMDA()
 
 from rdkit import Chem
-from rdkit.Chem.AllChem import AssignBondOrdersFromTemplate
 
 from prolif.rdkitmol import BaseRDKitMol
 from prolif.residue import Residue, ResidueGroup
-from prolif.utils import catch_rdkit_logs, catch_warning, split_mol_by_residues
+from prolif.utils import split_mol_by_residues
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -285,7 +283,7 @@ class pdbqt_supplier(Sequence[Molecule]):
     def __iter__(self) -> Iterator[Molecule]:
         # Check if MDAnalysis is available at iteration time
         try:
-            import MDAnalysis as mda
+            import MDAnalysis
         except ImportError:
             raise NotImplementedError(
                 "PDBQT file support requires MDAnalysis dependency, which has been "
@@ -294,8 +292,8 @@ class pdbqt_supplier(Sequence[Molecule]):
                 "  - Use sdf_supplier() for SDF ligand files\n"
                 "  - Use RDKit directly: Molecule.from_rdkit(Chem.MolFromPDBFile())\n"
                 "See documentation for detailed migration guide."
-            )
-        
+            ) from None
+
         for pdbqt_path in self.paths:
             yield self.pdbqt_to_mol(pdbqt_path)
 

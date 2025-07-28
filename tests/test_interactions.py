@@ -57,18 +57,16 @@ def interaction_instances() -> dict[str, Interaction]:
 
 @pytest.fixture(scope="session")
 def any_mol(request: pytest.FixtureRequest) -> "Molecule":
-    if hasattr(request, 'param'):
+    if hasattr(request, "param"):
         return cast("Molecule", request.getfixturevalue(request.param))
-    else:
-        pytest.skip("No param provided")
+    pytest.skip("No param provided")
 
 
 @pytest.fixture(scope="session")
 def any_other_mol(request: pytest.FixtureRequest) -> "Molecule":
-    if hasattr(request, 'param'):
+    if hasattr(request, "param"):
         return cast("Molecule", request.getfixturevalue(request.param))
-    else:
-        pytest.skip("No param provided")
+    pytest.skip("No param provided")
 
 
 @pytest.fixture(scope="module")
@@ -401,7 +399,9 @@ class TestInteractions:
         # which has been removed. Skip these tests.
         pytest.skip("create_rings requires MDAnalysis trajectory functionality")
 
-    @pytest.mark.skip(reason="Specific residue interaction test requires exact molecular structure")
+    @pytest.mark.skip(
+        reason="Specific residue interaction test requires exact molecular structure"
+    )
     def test_edgetoface_phe331(
         self, ligand_mol: "Molecule", protein_mol: "Molecule", fingerprint: Fingerprint
     ) -> None:
@@ -433,7 +433,9 @@ class TestBridgedInteractions:
                 parameters={"WaterBridge": {"water": water, **kwargs}},
             )
 
-    @pytest.mark.skip(reason="Water bridge test requires MDAnalysis trajectory analysis")
+    @pytest.mark.skip(
+        reason="Water bridge test requires MDAnalysis trajectory analysis"
+    )
     def test_direct_water_bridge(
         self,
         water_u: "Universe",
