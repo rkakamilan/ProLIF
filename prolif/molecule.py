@@ -283,6 +283,19 @@ class pdbqt_supplier(Sequence[Molecule]):
         self._kwargs = kwargs
 
     def __iter__(self) -> Iterator[Molecule]:
+        # Check if MDAnalysis is available at iteration time
+        try:
+            import MDAnalysis as mda
+        except ImportError:
+            raise NotImplementedError(
+                "PDBQT file support requires MDAnalysis dependency, which has been "
+                "removed. Alternative approaches:\n"
+                "  - Convert PDBQT files to PDB/SDF format using external tools\n"
+                "  - Use sdf_supplier() for SDF ligand files\n"
+                "  - Use RDKit directly: Molecule.from_rdkit(Chem.MolFromPDBFile())\n"
+                "See documentation for detailed migration guide."
+            )
+        
         for pdbqt_path in self.paths:
             yield self.pdbqt_to_mol(pdbqt_path)
 
@@ -303,72 +316,19 @@ class pdbqt_supplier(Sequence[Molecule]):
         return self.pdbqt_to_mol(pdbqt_path)
 
     def pdbqt_to_mol(self, pdbqt_path: Union[str, "Path"]) -> Molecule:
-        if not _HAS_MDANALYSIS:
-            raise NotImplementedError(
-                "PDBQT file support requires MDAnalysis, which is no longer available. "
-                "Please convert PDBQT files to PDB or SDF format using external tools "
-                "(e.g., Open Babel: obabel -ipdbqt file.pdbqt -opdb -O file.pdb)."
-            )
-
-        with catch_warning(message=r"^Failed to guess the mass"):
-            pdbqt = mda.Universe(pdbqt_path)
-        # set attributes needed by the converter
-        elements = [
-            mda.topology.guessers.guess_atom_element(x) for x in pdbqt.atoms.names
-        ]
-        pdbqt.add_TopologyAttr("elements", elements)
-        pdbqt.add_TopologyAttr("chainIDs", pdbqt.atoms.segids)
-        pdbqt.atoms.types = pdbqt.atoms.elements
-        # convert without infering bond orders and charges
-        with (
-            catch_rdkit_logs(),
-            catch_warning(
-                message=r"^(Could not sanitize molecule)|"
-                r"(No `bonds` attribute in this AtomGroup)",
-            ),
-        ):
-            pdbqt_mol = pdbqt.atoms.convert_to.rdkit(
-                NoImplicit=False,
-                **self.converter_kwargs,
-            )
-        mol = self._adjust_hydrogens(self.template, pdbqt_mol)
-        return Molecule.from_rdkit(mol, **self._kwargs)
+        raise NotImplementedError(
+            "PDBQT file support requires MDAnalysis, which is no longer available. "
+            "Please convert PDBQT files to PDB or SDF format using external tools "
+            "(e.g., Open Babel: obabel -ipdbqt file.pdbqt -opdb -O file.pdb)."
+        )
 
     @staticmethod
     def _adjust_hydrogens(template: Chem.Mol, pdbqt_mol: Chem.Mol) -> Chem.Mol:
-        # remove explicit hydrogens and assign BO from template
-        pdbqt_noH = Chem.RemoveAllHs(pdbqt_mol, sanitize=False)
-        with catch_rdkit_logs():
-            mol: Chem.Mol = AssignBondOrdersFromTemplate(template, pdbqt_noH)
-        # mapping between pdbindex of atom bearing H --> H atom(s)
-        atoms_with_hydrogens: defaultdict[int, list[Chem.Atom]] = defaultdict(list)
-        for atom in pdbqt_mol.GetAtoms():
-            if atom.GetAtomicNum() == 1:
-                atoms_with_hydrogens[
-                    atom.GetNeighbors()[0].GetIntProp("_MDAnalysis_index")
-                ].append(atom)
-        # mapping between atom that should be bearing a H in RWMol and
-        # corresponding hydrogens
-        reverse_mapping: dict[int, list[Chem.Atom]] = {}
-        for atom in mol.GetAtoms():
-            if (idx := atom.GetIntProp("_MDAnalysis_index")) in atoms_with_hydrogens:
-                reverse_mapping[atom.GetIdx()] = atoms_with_hydrogens[idx]
-                atom.SetNumExplicitHs(0)
-        # add missing Hs
-        pdb_conf = pdbqt_mol.GetConformer()
-        rwmol = Chem.RWMol(mol)
-        mol_conf = rwmol.GetConformer()
-        for atom_idx, hydrogens in reverse_mapping.items():
-            for hydrogen in hydrogens:
-                h_idx = rwmol.AddAtom(hydrogen)
-                xyz = pdb_conf.GetAtomPosition(hydrogen.GetIdx())
-                mol_conf.SetAtomPosition(h_idx, xyz)
-                rwmol.AddBond(atom_idx, h_idx, Chem.BondType.SINGLE)
-        mol = rwmol.GetMol()
-        # sanitize
-        mol.UpdatePropertyCache()
-        Chem.SanitizeMol(mol)
-        return mol
+        """Adjust hydrogens (DEPRECATED - MDAnalysis functionality removed)"""
+        raise NotImplementedError(
+            "_adjust_hydrogens is no longer supported due to removal of "
+            "MDAnalysis dependency. PDBQT functionality has been removed."
+        )
 
     def __len__(self) -> int:
         return len(self.paths)

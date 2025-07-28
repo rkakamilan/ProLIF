@@ -49,10 +49,8 @@ class TestBarcode:
         protein_mol: plf.Molecule,
         fp: plf.Fingerprint,
     ) -> plf.Fingerprint:
-        # Use generate instead of run with trajectory for single frame analysis
-        results = fp.generate(ligand_mol, protein_mol)
-        # Set ifp attribute properly for plotting
-        fp.ifp = {0: results, 1: results}
+        # Use run_from_iterable to create proper IFP structure  
+        fp.run_from_iterable([ligand_mol], protein_mol)
         return fp
 
     @pytest.fixture(scope="class")

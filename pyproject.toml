@@ -49,12 +49,12 @@ tutorials = [
     "matplotlib>=3.7",
     "seaborn<1.0",
     "pyvis",
-    "prolif[plots]",
+    "prolif-lite[plots]",
 ]
 
 [dependency-groups]
 build = ["build"]
-tests = ["pytest>=6.1.2", "pytest-cov", "ipython", "prolif[plots]"]
+tests = ["pytest>=6.1.2", "pytest-cov", "ipython", "prolif-lite[plots]"]
 docs = [
     "sphinx==5.3.0",
     "sphinx-copybutton",
@@ -62,7 +62,7 @@ docs = [
     "ipywidgets",
     "recommonmark",
     "sphinx-book-theme",
-    "prolif[tutorials]",
+    "prolif-lite[tutorials]",
 ]
 type-check = [
     "mypy>=1.0.0",

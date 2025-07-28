@@ -507,7 +507,12 @@ class Complex3D:
 
         # show protein
         mol = Chem.RemoveAllHs(self.prot_mol, sanitize=False)
-        pdb = Chem.MolToPDBBlock(mol, flavor=0x20 | 0x10)
+        try:
+            pdb = Chem.MolToPDBBlock(mol, flavor=0x20 | 0x10)
+        except Chem.rdchem.KekulizeException:
+            # Fallback: try with different sanitization settings
+            mol = Chem.RemoveAllHs(self.prot_mol, sanitize=True)
+            pdb = Chem.MolToPDBBlock(mol, flavor=0x20 | 0x10)
         v.addModel(pdb, "pdb", viewer=position)
         model = v.getModel(viewer=position)
         model.setStyle({}, self.PROTEIN_STYLE)
