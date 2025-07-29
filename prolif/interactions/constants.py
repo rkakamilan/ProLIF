@@ -60,7 +60,7 @@ _MDANALYSIS_VDWRADII = {
     "RN": 2.2,
     "FR": 3.48,
     "RA": 2.83,
-    "U": 1.86
+    "U": 1.86,
 }
 
 VDWRADII: dict[str, float] = {
@@ -176,7 +176,7 @@ CSD_VDWRADII: dict[str, float] = {
     "Ac": 2.8,
     "Th": 2.93,
     "Pa": 2.88,
-    "U": 2.71,  # noqa
+    "U": 2.71,
     "Np": 2.82,
     "Pu": 2.81,
     "Am": 2.83,
