@@ -176,7 +176,7 @@ CSD_VDWRADII: dict[str, float] = {
     "Ac": 2.8,
     "Th": 2.93,
     "Pa": 2.88,
-    "U": 2.71,
+    "U": 2.71,  # noqa
     "Np": 2.82,
     "Pu": 2.81,
     "Am": 2.83,
