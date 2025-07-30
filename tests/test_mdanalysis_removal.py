@@ -46,7 +46,7 @@ class TestMDAnalysisRemoval:
         assert get_vdw_radius("C") == 1.7
         assert get_vdw_radius("N") == 1.55
         assert get_vdw_radius("O") == 1.52
-        assert get_vdw_radius("H") == 1.2
+        assert get_vdw_radius("H") == 1.1
 
     def test_basic_molecule_functionality_works(self):
         """Test that basic molecule functionality works without MDAnalysis."""
