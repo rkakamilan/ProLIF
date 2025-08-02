@@ -127,6 +127,21 @@ uv sync
 
 ## Migration Guide (MDAnalysis Removal)
 
+### Hydrophobic Interaction Definition Changes
+
+**⚠️ IMPORTANT CHANGE**: The Hydrophobic interaction definition has been improved in version 2.1.0 to exclude carbon atoms connected to nitrogen/oxygen/fluoride, resulting in more scientifically accurate hydrophobic interaction detection.
+
+**Impact on Results:**
+- Previous versions (≤2.0.3): Included aromatic carbons connected to N/O/F as hydrophobic
+- Current version (≥2.1.0): Properly excludes all carbons connected to N/O/F from hydrophobic detection
+- This results in fewer but more accurate hydrophobic interactions being detected
+
+**Example:**
+- Original ProLIF 2.0.3: 22 hydrophobic matches per ligand
+- Current ProLIF 2.1.2: 14 hydrophobic matches per ligand (8 N/O/F-connected carbons excluded)
+
+This change improves the scientific accuracy of hydrophobic interaction fingerprints by following established chemical principles.
+
 ### Code Changes Required
 
 **Old (MDAnalysis-based):**
