@@ -176,3 +176,4 @@ $RECYCLE.BIN/
 docs/notebooks/debug.log
 docs/notebooks/*.html
 *.pkl
+CLAUDE.local.md
