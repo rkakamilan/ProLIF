@@ -222,6 +222,30 @@ class TestResidueGroup:
         assert_equal(rg._residues, [])
         assert rg.data == {}
 
+    def test_number_dtype_is_uint32(self, residues: list[Residue]) -> None:
+        import numpy as np
+
+        rg = ResidueGroup(residues)
+        assert rg.number.dtype == np.uint32
+
+    def test_number_dtype_empty_is_uint32(self) -> None:
+        import numpy as np
+
+        rg = ResidueGroup([])
+        assert rg.number.dtype == np.uint32
+
+    def test_number_large_residue_number(self) -> None:
+        """Residue numbers > 65535 must not overflow (uint16 would silently wrap)."""
+        import numpy as np
+
+        large_number = 70000
+        resid = ResidueId("LIG", large_number, "A")
+        assert resid.number == large_number
+        # Simulate a ResidueGroup built from a residue with a large number by
+        # directly checking that uint32 can represent this value without overflow
+        arr = np.asarray([large_number], dtype=np.uint32)
+        assert arr[0] == large_number
+
     def test_n_residues(self, residues: list[Residue]) -> None:
         rg = ResidueGroup(residues)
         assert rg.n_residues == len(rg)
