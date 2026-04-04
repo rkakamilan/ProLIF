@@ -8,8 +8,10 @@ in :meth:`~prolif.fingerprint.Fingerprint.run` and
 :meth:`~prolif.fingerprint.Fingerprint.run_from_iterable` respectively.
 """
 
+import os
 from collections.abc import Iterable
 from ctypes import c_uint32
+from multiprocessing import cpu_count
 from threading import Event, Thread
 from time import sleep
 from typing import TYPE_CHECKING, Any, ClassVar, cast
@@ -333,3 +335,38 @@ class MolIterablePool:
     def __exit__(self, *exc: Any) -> None:
         """Resets RDKit's default pickled properties"""
         PICKLE_HANDLER.reset()
+
+
+MAX_JOBS = 10
+
+
+def get_n_jobs(n_jobs: int | None, *, capped: bool = True) -> int | None:
+    """Determine the number of parallel jobs to use.
+
+    Priority: explicit ``n_jobs`` > ``PROLIF_N_JOBS`` env var > logical CPU count.
+    When ``capped=True``, the result is limited to :data:`MAX_JOBS` to prevent
+    excessive memory usage on large machines.
+
+    Parameters
+    ----------
+    n_jobs : int or None
+        Explicitly requested number of jobs. ``None`` means use all available CPUs
+        (subject to the cap).
+    capped : bool
+        Whether to cap the result at :data:`MAX_JOBS` (default ``True``).
+
+    Returns
+    -------
+    int or None
+        Number of jobs to use, or ``None`` if the environment variable is set to ``0``
+        (sequential execution).
+    """
+    if n_jobs is not None:
+        return n_jobs
+    env_jobs = os.environ.get("PROLIF_N_JOBS")
+    if env_jobs is not None:
+        return int(env_jobs) or None
+    n_cpus = cpu_count()
+    if capped:
+        return min(n_cpus, MAX_JOBS)
+    return n_cpus

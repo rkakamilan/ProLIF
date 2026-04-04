@@ -25,7 +25,6 @@ Calculate a Protein-Ligand Interaction Fingerprint --- :mod:`prolif.fingerprint`
 
 """
 
-import os
 import warnings
 from collections.abc import Iterable, Sequence, Sized
 from inspect import signature
@@ -70,7 +69,7 @@ from prolif.interactions.base import (
     _INTERACTIONS,
 )
 from prolif.molecule import Molecule
-from prolif.parallel import MolIterablePool, TrajectoryPool
+from prolif.parallel import MolIterablePool, TrajectoryPool, get_n_jobs
 from prolif.plotting.utils import IS_NOTEBOOK
 from prolif.utils import (
     get_residues_near_ligand,
@@ -649,8 +648,7 @@ class Fingerprint:
             and maxsize <= 2
         ):
             set_converter_cache_size(2 + len(self.bridged_interactions))
-        if n_jobs is None:
-            n_jobs = int(os.environ.get("PROLIF_N_JOBS", "0")) or None
+        n_jobs = get_n_jobs(n_jobs, capped=True)
         if self.use_segid is None:
             self.use_segid = self._use_segid(lig, prot)
         if residues == "all":
@@ -868,8 +866,7 @@ class Fingerprint:
             raise ValueError("n_jobs must be > 0 or None")
         if residues == "all":
             residues = list(prot_mol.residues)
-        if n_jobs is None:
-            n_jobs = int(os.environ.get("PROLIF_N_JOBS", "0")) or None
+        n_jobs = get_n_jobs(n_jobs, capped=False)
 
         if self.interactions:
             if n_jobs == 1:
