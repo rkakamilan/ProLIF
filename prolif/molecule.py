@@ -6,7 +6,7 @@ Reading proteins and ligands --- :mod:`prolif.molecule`
 import copy
 from collections.abc import Iterable, Iterator, Sequence
 from operator import attrgetter
-from typing import TYPE_CHECKING, Any, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, Callable, TypeVar, Union, overload
 
 try:
     import MDAnalysis as mda
@@ -34,6 +34,7 @@ from prolif.utils import split_mol_by_residues
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from prolif.residue import ResidueId
     from prolif.typeshed import MDAObject, ResidueKey
 
     Self = TypeVar("Self", bound=BaseRDKitMol)
@@ -503,3 +504,54 @@ class mol2_supplier(Sequence[Molecule]):
     def __len__(self) -> int:
         with open(self.path) as f:
             return sum(line.startswith("@<TRIPOS>MOLECULE") for line in f)
+
+
+def split_molecule(
+    mol: Molecule, predicate: "Callable[[ResidueId], bool]"
+) -> "tuple[Molecule, Molecule]":
+    """Splits a molecule into two based on a predicate function.
+
+    The first molecule returned contains all residues of the input mol for which
+    the predicate function was true, the second molecule contains the rest.
+    This function is typically used to extract a ligand or water molecules from a
+    file containing a solvated complex::
+
+        >>> solvated_system = Molecule(...)
+        >>> water_mol, protein_mol = split_molecule(
+        ...     solvated_system, lambda resid: resid.name == "WAT"
+        ... )
+
+    Parameters
+    ----------
+    mol : prolif.molecule.Molecule
+        Input molecule containing multiple residues
+    predicate : Callable[[ResidueId], bool]
+        A function that takes a ResidueId and returns True for residues to
+        include in the first output molecule.
+
+    Returns
+    -------
+    tuple[Molecule, Molecule]
+        Two molecules: the first contains residues where predicate returned True,
+        the second contains the remaining residues.
+
+    .. versionadded:: 2.2.0
+
+    """
+    lhs_indices: list[int] = []
+    rhs_indices: list[int] = []
+    for residue in mol:
+        indices = [atom.GetUnsignedProp("mapindex") for atom in residue.GetAtoms()]
+        if predicate(residue.resid):
+            lhs_indices.extend(indices)
+        else:
+            rhs_indices.extend(indices)
+
+    def _extract(indices: list[int]) -> Molecule:
+        rw = Chem.RWMol(mol)
+        remove = sorted(set(range(mol.GetNumAtoms())) - set(indices), reverse=True)
+        for idx in remove:
+            rw.RemoveAtom(idx)
+        return Molecule(rw.GetMol())
+
+    return _extract(lhs_indices), _extract(rhs_indices)

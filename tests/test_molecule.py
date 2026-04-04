@@ -17,7 +17,7 @@ from numpy.testing import assert_array_equal
 from rdkit import Chem
 
 from prolif.datafiles import datapath
-from prolif.molecule import Molecule, mol2_supplier, pdbqt_supplier, sdf_supplier
+from prolif.molecule import Molecule, mol2_supplier, pdbqt_supplier, sdf_supplier, split_molecule
 from prolif.residue import Residue, ResidueId
 
 if TYPE_CHECKING:
@@ -203,3 +203,33 @@ class TestMOL2Supplier(SupplierBase):
         suppl = mol2_supplier(path, cleanup_substructures=False)
         mol = next(iter(suppl))
         assert isinstance(mol, Molecule)
+
+
+class TestSplitMolecule:
+    @pytest.fixture(scope="class")
+    def protein(self, rdkit_mol: Chem.Mol) -> Molecule:
+        return Molecule(rdkit_mol)
+
+    def test_split_partial(self, protein: Molecule) -> None:
+        lig_residue_name = next(iter(protein)).resid.name
+        lhs, rhs = split_molecule(protein, lambda r: r.name == lig_residue_name)
+        assert lhs.n_residues > 0
+        assert rhs.n_residues > 0
+        assert lhs.n_residues + rhs.n_residues == protein.n_residues
+        assert lhs.GetNumAtoms() + rhs.GetNumAtoms() == protein.GetNumAtoms()
+
+    def test_split_all_true(self, protein: Molecule) -> None:
+        lhs, rhs = split_molecule(protein, lambda r: True)
+        assert lhs.n_residues == protein.n_residues
+        assert lhs.GetNumAtoms() == protein.GetNumAtoms()
+        assert rhs.GetNumAtoms() == 0
+
+    def test_split_all_false(self, protein: Molecule) -> None:
+        lhs, rhs = split_molecule(protein, lambda r: False)
+        assert lhs.GetNumAtoms() == 0
+        assert rhs.n_residues == protein.n_residues
+        assert rhs.GetNumAtoms() == protein.GetNumAtoms()
+
+    def test_split_molecule_exported(self) -> None:
+        import prolif
+        assert hasattr(prolif, "split_molecule")
