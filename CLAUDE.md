@@ -45,6 +45,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **⚠️ IMPORTANT: MDAnalysis Dependency Removed**  
 MDAnalysis 依存を除去済み。MD軌跡解析は非対応。ドッキング結果解析（PDB タンパク質 + SDF リガンド）にフォーカス。
 
+## Release & PyPI Publishing
+
+### リリース手順
+1. `prolif/_version.py` のバージョンを更新してコミット・push
+2. GitHub で Release を作成（タグ例: `v2.1.4`）
+3. `build.yml` が自動起動し、ビルド後に PyPI へ自動 publish される
+
+### PyPI Trusted Publishing
+- `PYPI_TOKEN` シークレットは**不要**（OIDC Trusted Publishing を使用）
+- 新しいリポジトリで初めて publish する場合のみ、PyPI 側で一度だけ設定が必要:
+  1. https://pypi.org/manage/project/prolif-lite/ を開く
+  2. 左メニュー **「Publishing」** タブ → **「Add a new publisher」**
+  3. GitHub Actions を選択し以下を入力:
+     - Owner: `rkakamilan` / Repository: `ProLIF` / Workflow: `build.yml`
+
+### バージョニング方針
+- upstream (chemosim-lab/ProLIF) との連続性を重視し patch bump を基本とする
+- 新しい公開 API の追加や動作変更を伴う場合は minor bump
+
 ## Commands
 
 ### Development and Testing
