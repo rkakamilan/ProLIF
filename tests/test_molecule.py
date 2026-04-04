@@ -17,7 +17,13 @@ from numpy.testing import assert_array_equal
 from rdkit import Chem
 
 from prolif.datafiles import datapath
-from prolif.molecule import Molecule, mol2_supplier, pdbqt_supplier, sdf_supplier, split_molecule
+from prolif.molecule import (
+    Molecule,
+    mol2_supplier,
+    pdbqt_supplier,
+    sdf_supplier,
+    split_molecule,
+)
 from prolif.residue import Residue, ResidueId
 
 if TYPE_CHECKING:
@@ -232,4 +238,5 @@ class TestSplitMolecule:
 
     def test_split_molecule_exported(self) -> None:
         import prolif
+
         assert hasattr(prolif, "split_molecule")

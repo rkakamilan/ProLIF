@@ -4,9 +4,9 @@ Reading proteins and ligands --- :mod:`prolif.molecule`
 """
 
 import copy
-from collections.abc import Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from operator import attrgetter
-from typing import TYPE_CHECKING, Any, Callable, TypeVar, Union, overload
+from typing import TYPE_CHECKING, Any, TypeVar, Union, overload
 
 try:
     import MDAnalysis as mda
