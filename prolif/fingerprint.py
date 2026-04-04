@@ -69,7 +69,7 @@ from prolif.interactions.base import (
     _INTERACTIONS,
 )
 from prolif.molecule import Molecule
-from prolif.parallel import MolIterablePool, TrajectoryPool, get_n_jobs
+from prolif.parallel import MolIterablePool, TrajectoryPool
 from prolif.plotting.utils import IS_NOTEBOOK
 from prolif.utils import (
     get_residues_near_ligand,
@@ -648,6 +648,8 @@ class Fingerprint:
             and maxsize <= 2
         ):
             set_converter_cache_size(2 + len(self.bridged_interactions))
+        from prolif.parallel import get_n_jobs
+
         n_jobs = get_n_jobs(n_jobs, capped=True)
         if self.use_segid is None:
             self.use_segid = self._use_segid(lig, prot)
@@ -864,6 +866,8 @@ class Fingerprint:
         """
         if n_jobs is not None and n_jobs < 1:
             raise ValueError("n_jobs must be > 0 or None")
+        from prolif.parallel import get_n_jobs
+
         if residues == "all":
             residues = list(prot_mol.residues)
         n_jobs = get_n_jobs(n_jobs, capped=False)

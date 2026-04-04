@@ -2,8 +2,6 @@ import os
 from multiprocessing import cpu_count
 from unittest.mock import patch
 
-import pytest
-
 from prolif.parallel import MAX_JOBS, get_n_jobs
 
 
